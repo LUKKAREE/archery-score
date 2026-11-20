@@ -47,10 +47,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
 
       - name: จัดไฟล์เข้าโฟลเดอร์
         run: |
+          echo "sdk.dir=$ANDROID_HOME"
           mkdir -p www assets ~/.android
           cp $WEB_FILES www/
           cp icon-only.png icon-foreground.png icon-background.png splash.png assets/
