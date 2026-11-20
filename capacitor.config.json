@@ -1,0 +1,6 @@
+{
+  "appId": "com.archeryscore.app",
+  "appName": "นับแต้มธนู",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

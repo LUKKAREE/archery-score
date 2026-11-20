@@ -1,0 +1,96 @@
+name: Build APK และเว็บไซต์
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+env:
+  WEB_FILES: index.html sw.js manifest.webmanifest icon-192.png icon-512.png ibm-plex-sans-thai-*.woff2
+
+jobs:
+  website:
+    name: ขึ้นเว็บ GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: รวมไฟล์เว็บ
+        run: mkdir -p site && cp $WEB_FILES site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+
+      - name: จัดไฟล์เข้าโฟลเดอร์
+        run: |
+          mkdir -p www assets ~/.android
+          cp $WEB_FILES www/
+          cp icon-only.png icon-foreground.png icon-background.png splash.png assets/
+          cp debug.keystore ~/.android/debug.keystore
+
+      - name: ติดตั้งแพ็กเกจ
+        run: npm install --no-audit --no-fund
+
+      - name: สร้างโปรเจกต์ Android + ไอคอน
+        run: |
+          npx cap add android
+          npm run icons
+          npx cap sync android
+
+      - name: ตั้งเลขเวอร์ชัน
+        run: |
+          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+
+      - name: Build
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: ตั้งชื่อไฟล์
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk archery-score.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archery-score-apk
+          path: archery-score.apk
+
+      - name: ปล่อยไฟล์ในหน้า Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: นับแต้มธนู เวอร์ชัน 1.0.${{ github.run_number }}
+          body: |
+            ดาวน์โหลด archery-score.apk ด้านล่าง แล้วเปิดบนมือถือ Android เพื่อติดตั้ง
+            (ครั้งแรกต้องอนุญาต "ติดตั้งแอปที่ไม่รู้จัก")
+          files: archery-score.apk
+          make_latest: true

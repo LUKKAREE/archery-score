@@ -1,0 +1,19 @@
+{
+  "name": "archery-score",
+  "version": "1.0.0",
+  "private": true,
+  "description": "นับแต้มธนู · สถิติการยิง",
+  "scripts": {
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "icons": "capacitor-assets generate --android --iconBackgroundColor '#1D6B47' --splashBackgroundColor '#F4F2EC'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.0.0"
+  }
+}

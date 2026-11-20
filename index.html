@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>นับแต้มธนู · สถิติการยิง</title>
+<meta name="theme-color" content="#1D6B47">
+<meta name="description" content="บันทึกคะแนนยิงธนู เก็บสถิติ และสร้างเป้าแบบกำหนดเอง">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:400;font-display:swap;src:url(ibm-plex-sans-thai-thai-400-normal.woff2) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:400;font-display:swap;src:url(ibm-plex-sans-thai-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:500;font-display:swap;src:url(ibm-plex-sans-thai-thai-500-normal.woff2) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:500;font-display:swap;src:url(ibm-plex-sans-thai-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:600;font-display:swap;src:url(ibm-plex-sans-thai-thai-600-normal.woff2) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:600;font-display:swap;src:url(ibm-plex-sans-thai-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:700;font-display:swap;src:url(ibm-plex-sans-thai-thai-700-normal.woff2) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:'IBM Plex Sans Thai';font-style:normal;font-weight:700;font-display:swap;src:url(ibm-plex-sans-thai-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --bg:#F4F2EC;--surface:#FFFFFF;--surface2:#ECE9E1;--ink:#1A1C19;--ink2:#565A53;--muted:#878B83;
+  --line:#E0DCD2;--accent:#1D6B47;--accentInk:#FFFFFF;--accentSoft:#E1EFE6;--danger:#B8342C;--dangerSoft:#F8E3E1;
+  --paper:#ECE5D3;--shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.06);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --safeB:env(safe-area-inset-bottom,0px);--safeT:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#111311;--surface:#1A1D1A;--surface2:#242823;--ink:#ECEDE7;--ink2:#B4B8AF;--muted:#82867F;
+  --line:#2D312C;--accent:#5BC690;--accentInk:#0B1A11;--accentSoft:#1B3326;--danger:#EE6B60;--dangerSoft:#3A1F1C;
+  --paper:#CFC7B3;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.3);}}
+:root[data-theme=dark]{
+  --bg:#111311;--surface:#1A1D1A;--surface2:#242823;--ink:#ECEDE7;--ink2:#B4B8AF;--muted:#82867F;
+  --line:#2D312C;--accent:#5BC690;--accentInk:#0B1A11;--accentSoft:#1B3326;--danger:#EE6B60;--dangerSoft:#3A1F1C;
+  --paper:#CFC7B3;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.3);}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Thai',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:calc(10px + var(--safeT)) 14px calc(96px + var(--safeB))}
+header.top{display:flex;align-items:center;gap:10px;padding:4px 2px 12px}
+header.top .logo{width:34px;height:34px;flex:none}
+header.top h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.01em}
+header.top .sub{font-size:12px;color:var(--muted);margin-top:-2px}
+.sync{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.ok i{background:var(--accent)} .sync.busy i{background:#D9A520} .sync.err i{background:var(--danger)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h2{font-size:16px;margin:0 0 10px;font-weight:600}
+.card h3{font-size:14px;margin:0 0 8px;font-weight:600;color:var(--ink2)}
+.muted{color:var(--muted)} .ink2{color:var(--ink2)} .small{font-size:13px} .tiny{font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;transition:transform .06s}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accentInk);font-weight:600}
+.btn.soft{background:var(--accentSoft);border-color:transparent;color:var(--accent)}
+.btn.danger{color:var(--danger);border-color:var(--dangerSoft);background:var(--dangerSoft)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.sm{min-height:34px;padding:5px 10px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+label.f{display:block;font-size:13px;color:var(--ink2);margin-bottom:10px}
+label.f>span{display:block;margin-bottom:4px;font-weight:500}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:9px 11px;min-height:42px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input[type=color]{width:38px;height:34px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface2);flex:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 10px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:var(--safeB);z-index:20}
+nav.tabs .in{display:flex;max-width:760px;width:100%}
+nav.tabs button{flex:1;border:0;background:none;padding:8px 2px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{color:var(--accent);font-weight:600}
+.view{display:none}.view.on{display:block}
+/* shooting */
+.scorehead{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.big{font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big small{font-size:16px;color:var(--muted);font-weight:500;margin-left:4px}
+.kv{display:flex;gap:16px;flex-wrap:wrap}
+.kv div{font-size:12px;color:var(--muted)} .kv b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.tgtwrap{position:relative;margin:4px auto 0;max-width:520px}
+#tsvg{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:12px;cursor:crosshair}
+.endbar{display:flex;gap:6px;align-items:center;margin:10px 0 6px;flex-wrap:wrap}
+.slot{width:34px;height:34px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
+.chip{min-width:34px;height:34px;padding:0 6px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;flex:none;border:1px solid transparent}
+.chip.s{min-width:28px;height:28px;font-size:12.5px}
+.keypad{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:7px;margin-top:8px}
+.keypad button{height:52px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font-weight:700;font-size:18px;cursor:pointer;font-variant-numeric:tabular-nums}
+.keypad button:active{transform:scale(.95)}
+.keypad button[disabled]{opacity:.4}
+table.ends{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.ends th{font-size:12px;color:var(--muted);font-weight:500;text-align:left;padding:4px 4px;border-bottom:1px solid var(--line)}
+table.ends td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.ends td.n{color:var(--muted);width:28px}
+table.ends td.r{text-align:right;font-weight:600;width:48px}
+table.ends tr.click{cursor:pointer} table.ends tr.click:hover td{background:var(--surface2)}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+/* target picker */
+.tpick{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory}
+.tpick label{flex:none;width:104px;scroll-snap-align:start;border:2px solid var(--line);border-radius:12px;padding:6px;cursor:pointer;text-align:center;font-size:11.5px;line-height:1.3;background:var(--surface2)}
+.tpick label svg{width:100%;height:auto;display:block;margin-bottom:4px;border-radius:6px}
+.tpick input{display:none}
+.tpick input:checked+label{border-color:var(--accent);background:var(--accentSoft)}
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.gcard svg{width:100%;height:auto;border-radius:10px;display:block}
+.gcard h3{margin:10px 0 4px;font-size:14px;line-height:1.35}
+.gcard p{margin:0 0 8px;font-size:12.5px;color:var(--ink2);flex:1;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.gcard p.open{-webkit-line-clamp:unset}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--surface2);color:var(--ink2);margin:0 4px 4px 0}
+.tag.acc{background:var(--accentSoft);color:var(--accent)}
+/* list */
+.sess{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.sess:last-child{border-bottom:0}
+.sess svg{width:52px;height:52px;flex:none;border-radius:8px}
+.sess .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess .sc{text-align:right;font-variant-numeric:tabular-nums}
+.sess .sc b{font-size:20px;display:block;line-height:1.1}
+/* stats */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.tile{background:var(--surface2);border-radius:12px;padding:10px 12px}
+.tile .l{font-size:12px;color:var(--muted)} .tile .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile .d{font-size:11.5px;color:var(--ink2)}
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.filters select{width:auto;min-width:120px;min-height:38px;padding:6px 10px;font-size:13.5px}
+.chart{position:relative;width:100%}
+.chart svg{display:block}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-10px;display:none;z-index:3;line-height:1.35}
+.empty{padding:26px 10px;text-align:center;color:var(--muted);font-size:14px}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,12,10,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal.on{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + var(--safeB));animation:up .18s ease-out}
+@media(min-width:700px){.modal{align-items:center}.sheet{border-radius:20px}}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.sheet h2{margin:0 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
+.sheet h2 .x{margin-left:auto}
+.toast{position:fixed;left:50%;bottom:calc(84px + var(--safeB));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.ringrow{display:grid;grid-template-columns:auto auto 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px}
+.ringrow input[type=text],.ringrow input[type=number]{min-height:36px;padding:5px 8px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:0}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+.seg button.on{background:var(--surface);box-shadow:var(--shadow);font-weight:600}
+.note{font-size:13px;color:var(--ink2);background:var(--surface2);border-radius:10px;padding:10px 12px;margin:8px 0 0}
+textarea.out{font-family:var(--mono);font-size:12px;min-height:200px}
+.rk{display:flex;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:10px}
+.rk:last-child{border-bottom:0}.rk:hover{background:var(--surface2)}
+.rk.me{background:var(--accentSoft)}
+.rk .no{width:30px;text-align:center;font-weight:700;font-size:16px;color:var(--ink2);flex:none;font-variant-numeric:tabular-nums}
+.rk .av{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink2);flex:none;font-size:14px}
+.rk .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .val{text-align:right;font-variant-numeric:tabular-nums;flex:none}.rk .val b{font-size:19px;display:block;line-height:1.15}
+.feed{display:flex;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13.5px}.feed:last-child{border-bottom:0}
+.hint{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff" stroke="#222" stroke-width="1"/><circle cx="20" cy="20" r="15" fill="#232323"/><circle cx="20" cy="20" r="11" fill="#2EA7DF"/><circle cx="20" cy="20" r="7.5" fill="#E6423B"/><circle cx="20" cy="20" r="4" fill="#F8D52A"/><path d="M31 9 21 19" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/><path d="M33.5 6.5l-4 .7 1.2 1.2-.7 1.7 1.7-.7 1.2 1.2z" fill="var(--ink)"/></svg>
+    <div><h1>นับแต้มธนู</h1><div class="sub">บันทึกคะแนน · สถิติ · เป้ากำหนดเอง</div></div>
+    <div id="sync" class="sync"><i></i><span>บันทึกในเครื่อง</span></div>
+  </header>
+  <section id="v-shoot" class="view on"></section>
+  <section id="v-history" class="view"></section>
+  <section id="v-stats" class="view"></section>
+  <section id="v-club" class="view"></section>
+  <section id="v-targets" class="view"></section>
+  <section id="v-settings" class="view"></section>
+</div>
+<nav class="tabs"><div class="in">
+  <button data-v="shoot" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>ยิง</button>
+  <button data-v="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>ประวัติ</button>
+  <button data-v="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>สถิติ</button>
+  <button data-v="club"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg>ชมรม</button>
+  <button data-v="targets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="4"/><rect x="13" y="3" width="8" height="8" rx="4"/><rect x="3" y="13" width="8" height="8" rx="4"/><path d="M17 14v6M14 17h6"/></svg>ชนิดเป้า</button>
+  <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>ตั้งค่า</button>
+</div></nav>
+<div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+/* ================= Utilities ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const r1=n=>Math.round(n*10)/10, r2=n=>Math.round(n*100)/100;
+const todayISO=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const fmtDate=iso=>{try{return new Date(iso+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}catch(e){return iso}};
+const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
+function lum(hex){const h=(hex||'#888').replace('#','');const f=h.length===3?h.split('').map(c=>c+c).join(''):h;const [r,g,b]=[0,2,4].map(i=>{let c=parseInt(f.substr(i,2),16)/255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b}
+function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));const A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* ================= Target definitions ================= */
+const C={w:['#FFFFFF','#222222'],k:['#232323','#FFFFFF'],b:['#2EA7DF','#1a1a1a'],r:['#E6423B','#1a1a1a'],g:['#F8D52A','#1a1a1a']};
+const waCol=s=>s<=2?C.w:s<=4?C.k:s<=6?C.b:s<=8?C.r:C.g;
+const ringsWA=from=>{const a=[];for(let s=from;s<=10;s++){const c=waCol(s);a.push({v:s,label:String(s),fill:c[0],line:c[1]})}return a};
+const LAYOUTS={single:'เป้าเดี่ยว','tri-v':'3 จุด แนวตั้ง','tri-t':'3 จุด สามเหลี่ยม',five:'5 จุด'};
+const BUILTIN=[
+ {id:'wa10',builtin:1,name:'WA 10 วง (122/80/60/40 ซม.)',layout:'single',rings:ringsWA(1),x:{v:10,label:'X',r:.5},
+  desc:'หน้าเป้ามาตรฐาน World Archery 10 วง 5 สี (ขาว ดำ น้ำเงิน แดง เหลือง) ใช้ได้ทั้ง 122 ซม. (70/60 ม.), 80 ซม. (50/30 ม.), 60 ซม. (25 ม.) และ 40 ซม. (18 ม.) · วง X นับ 10 และใช้ตัดสินกรณีคะแนนเท่ากัน',use:'เอาท์ดอร์ / อินดอร์'},
+ {id:'wa6',builtin:1,name:'WA 80 ซม. ตัด 6 วง (5–X)',layout:'single',rings:ringsWA(5),x:{v:10,label:'X',r:.5},
+  desc:'เป้า 80 ซม. แบบตัดเหลือเฉพาะวง 5–10 ใช้ในการแข่งคอมพาวด์ 50 ม. ลูกที่ออกนอกวง 5 นับเป็น M (0)',use:'คอมพาวด์ 50 ม.'},
+ {id:'wa3v',builtin:1,name:'WA 40 ซม. 3 จุด แนวตั้ง',layout:'tri-v',rings:ringsWA(6),x:{v:10,label:'X',r:.5},
+  desc:'เป้า 40 ซม. 3 จุดเรียงแนวตั้ง (วง 6–10) สำหรับในร่ม 18 ม. ยิงจุดละ 1 ลูก ช่วยลดการชนกันของลูกธนู ระบบจะเลือกจุดที่ใกล้ที่สุดให้อัตโนมัติ',use:'ในร่ม 18 ม.'},
+ {id:'vegas',builtin:1,name:'Vegas 3 จุด สามเหลี่ยม',layout:'tri-t',rings:ringsWA(6),x:{v:10,label:'X',r:.5},
+  desc:'เป้า 3 จุดจัดเป็นรูปสามเหลี่ยม (วง 6–10) ใช้ในรายการแบบ Vegas Shoot ยิง 3 ลูกต่อชุด ชุดละจุดละลูก',use:'ในร่ม 18 ม.'},
+ {id:'field',builtin:1,name:'WA Field เป้าสนาม',layout:'single',rings:[1,2,3,4].map(v=>({v,label:String(v),fill:'#232323',line:'#FFFFFF'})).concat([5,6].map(v=>({v,label:String(v),fill:'#F8D52A',line:'#1a1a1a'}))),x:{v:6,label:'X',r:.5},
+  desc:'เป้าสนามของ WA: วงนอก 4 วงสีดำ (1–4) วงในสีเหลือง (5–6) มี X ตรงกลาง ใช้ยิงในภูมิประเทศจริงซึ่งระยะเปลี่ยนไปทุกเป้า',use:'ยิงสนาม / ภูมิประเทศ'},
+ {id:'imperial',builtin:1,name:'Imperial 5 สี (9-7-5-3-1)',layout:'single',rings:[[1,C.w],[3,C.k],[5,C.b],[7,C.r],[9,C.g]].map(([v,c])=>({v,label:String(v),fill:c[0],line:c[1]})),x:null,
+  desc:'ระบบ Imperial ของอังกฤษ ให้คะแนนตามสี ทอง 9 · แดง 7 · น้ำเงิน 5 · ดำ 3 · ขาว 1 นิยมใช้ในรอบระยะหลา เช่น York, Hereford, National',use:'รอบระยะหลา (yd)'},
+ {id:'nfaa5',builtin:1,name:'NFAA 5 จุด น้ำเงิน-ขาว',layout:'five',rings:[{v:4,label:'4',fill:'#1F5FA8',line:'#FFFFFF'},{v:5,label:'5',fill:'#FFFFFF',line:'#1F5FA8'}],x:{v:5,label:'X',r:.5},
+  desc:'เป้า NFAA 5 จุด: วงขาวตรงกลาง 5 แต้ม (มี X) วงน้ำเงิน 4 แต้ม ยิงจุดละ 1 ลูก รวม 5 ลูกต่อชุด คะแนนเต็ม 300 ใน 60 ลูก',use:'NFAA ในร่ม 20 หลา'},
+ {id:'ibo3d',builtin:1,name:'3D / เป้าสัตว์ (11-10-8-5)',layout:'single',rings:[{v:5,label:'5',fill:'#7C6A4D',line:'#2F271B'},{v:8,label:'8',fill:'#A8936B',line:'#2F271B'},{v:10,label:'10',fill:'#CDB98F',line:'#2F271B'}],x:{v:11,label:'11',r:.5},
+  desc:'โซนคะแนนแบบเป้า 3D/สัตว์ (IBO) วาดเป็นวงกลมเพื่อบันทึกได้เร็ว: 11 วงในสุด · 10 · 8 (vital) · 5 (ลำตัว) · โดนนอกตัวสัตว์ = M',use:'3D / ล่าจำลอง'},
+];
+const SPOTS={single:[[100,100,96]],'tri-v':[[100,34,31],[100,100,31],[100,166,31]],'tri-t':[[55,60,42],[145,60,42],[100,140,42]],five:[[46,46,30],[154,46,30],[100,100,30],[46,154,30],[154,154,30]]};
+const spotsOf=t=>SPOTS[t.layout]||SPOTS.single;
+const maxArrow=t=>Math.max(t.x?Number(t.x.v)||0:0,...t.rings.map(r=>Number(r.v)||0));
+function ringFor(t,a){if(a.x&&t.rings.length)return t.rings[t.rings.length-1];for(let i=t.rings.length-1;i>=0;i--)if(Number(t.rings[i].v)===a.v)return t.rings[i];return null}
+function arrowLabel(t,a){if(a.x&&t.x)return t.x.label||'X';if(a.v===0&&!a.x)return 'M';const r=ringFor(t,a);return r?(r.label||String(a.v)):String(a.v)}
+function chipStyle(t,a){
+  if(a.v===0&&!a.x)return 'background:var(--surface2);color:var(--muted);border-color:var(--line)';
+  const r=ringFor(t,a);const bg=r?r.fill:'#999';const L=lum(bg);
+  return `background:${bg};color:${L>.45?'#151515':'#fff'};${L>.8?'border-color:rgba(0,0,0,.2)':''}`;
+}
+function chip(t,a,cls=''){return `<span class="chip ${cls}" style="${chipStyle(t,a)}">${esc(arrowLabel(t,a))}</span>`}
+
+/* Draw a target face as SVG markup (viewBox 0 0 200 200) */
+function faceSVG(t,opt={}){
+  let s=`<rect x="0" y="0" width="200" height="200" rx="${opt.rx??8}" fill="var(--paper)"/>`;
+  const n=t.rings.length; if(!n)return s;
+  spotsOf(t).forEach(([cx,cy,R],si)=>{
+    const sw=Math.max(.22,R*.009);
+    t.rings.forEach((ring,i)=>{const r=R*(n-i)/n;s+=`<circle cx="${cx}" cy="${cy}" r="${r.toFixed(2)}" fill="${ring.fill}" stroke="${ring.line}" stroke-width="${sw.toFixed(2)}"/>`});
+    const inner=t.rings[n-1];
+    if(t.x){const xr=R/n*(t.x.r??.5);s+=`<circle cx="${cx}" cy="${cy}" r="${xr.toFixed(2)}" fill="none" stroke="${inner.line}" stroke-width="${(sw*.8).toFixed(2)}"/>`}
+    const c=R*.035;s+=`<path d="M${cx-c} ${cy}h${2*c}M${cx} ${cy-c}v${2*c}" stroke="${inner.line}" stroke-width="${(sw*.7).toFixed(2)}" opacity=".7"/>`;
+    if(opt.labels&&si===(t.layout==='five'?2:t.layout==='tri-v'?1:0)){
+      const fs=Math.min(11,R/n*.55);
+      const xr0=t.x?R/n*(t.x.r??.5):0;t.rings.forEach((ring,i)=>{const x=(i===n-1&&t.x)?cx+(R/n+xr0)/2:cx+R*(n-i-.5)/n;s+=`<text x="${x.toFixed(2)}" y="${cy+fs*.36}" font-size="${fs.toFixed(2)}" text-anchor="middle" fill="${ring.line}" font-weight="600" font-family="IBM Plex Sans Thai,sans-serif">${esc(ring.label)}</text>`});
+      if(t.x&&xr0>fs*1.1){s+=`<text x="${cx}" y="${cy+fs*.36}" font-size="${(fs*.8).toFixed(2)}" text-anchor="middle" fill="${inner.line}" font-weight="700" font-family="IBM Plex Sans Thai,sans-serif">${esc(t.x.label)}</text>`}
+    }
+  });
+  return s;
+}
+function targetThumb(t,opt={}){return `<svg viewBox="0 0 200 200" ${opt.attr||''}>${faceSVG(t,opt)}${opt.extra||''}</svg>`}
+
+/* Score a point (viewBox coords) on target t */
+function scorePoint(t,x,y){
+  const sp=spotsOf(t);let best=0,bd=Infinity;
+  sp.forEach(([cx,cy,R],i)=>{const d=Math.hypot(x-cx,y-cy)/R;if(d<bd){bd=d;best=i}});
+  const [cx,cy,R]=sp[best];const nx=r2((x-cx)/R*100)/100,ny=r2((y-cy)/R*100)/100;
+  const n=t.rings.length;const a={v:0,x:false,nx:Math.round(nx*1e4)/1e4,ny:Math.round(ny*1e4)/1e4,sp:best};
+  if(bd>1)return a;
+  if(t.x&&bd<=(t.x.r??.5)/n){a.v=Number(t.x.v)||0;a.x=true;return a}
+  for(let i=n-1;i>=0;i--){if(bd<=(n-i)/n){a.v=Number(t.rings[i].v)||0;return a}}
+  return a;
+}
+const arrowXY=(t,a)=>{const sp=spotsOf(t)[a.sp||0]||spotsOf(t)[0];return [sp[0]+a.nx*sp[2],sp[1]+a.ny*sp[2]]};
+const markR=t=>Math.max(1.6,spotsOf(t)[0][2]*.028);
+
+/* ================= Rounds (presets) ================= */
+const ROUNDS=[
+ {id:'free',name:'ซ้อมอิสระ (ไม่จำกัดชุด)',target:'wa10',perEnd:6,ends:0,dist:'',unit:'m'},
+ {id:'wa720',name:'WA 720 · 70 ม. รีเคิร์ฟ',target:'wa10',perEnd:6,ends:12,dist:70,unit:'m'},
+ {id:'wa720c',name:'WA 720 · 50 ม. คอมพาวด์',target:'wa6',perEnd:6,ends:12,dist:50,unit:'m'},
+ {id:'wa18t',name:'WA 18 ม. ในร่ม · 3 จุด',target:'wa3v',perEnd:3,ends:20,dist:18,unit:'m'},
+ {id:'wa18s',name:'WA 18 ม. ในร่ม · เป้าเดี่ยว 40 ซม.',target:'wa10',perEnd:3,ends:20,dist:18,unit:'m'},
+ {id:'wa25',name:'WA 25 ม. · 60 ซม.',target:'wa10',perEnd:3,ends:20,dist:25,unit:'m'},
+ {id:'half',name:'ครึ่งรอบ 36 ลูก (6×6)',target:'wa10',perEnd:6,ends:6,dist:30,unit:'m'},
+ {id:'vegas',name:'Vegas 300',target:'vegas',perEnd:3,ends:10,dist:18,unit:'m'},
+ {id:'nfaa',name:'NFAA 300 · 5 จุด',target:'nfaa5',perEnd:5,ends:12,dist:20,unit:'yd'},
+ {id:'field',name:'Field 24 เป้า (3 ลูก/เป้า)',target:'field',perEnd:3,ends:24,dist:'',unit:'m'},
+ {id:'york',name:'Imperial ซ้อม 6×12',target:'imperial',perEnd:6,ends:12,dist:60,unit:'yd'},
+ {id:'3d',name:'3D 20 เป้า (1 ลูก/เป้า)',target:'ibo3d',perEnd:1,ends:20,dist:'',unit:'m'},
+];
+
+/* ================= State & storage ================= */
+const DEFAULT_PREFS={bows:['รีเคิร์ฟ','คอมพาวด์','แบร์โบว์','ลองโบว์ / ทราดิชันนัล'],theme:'auto',loupe:true,sortEnd:true,showPrev:true,autoNext:true,rounds:[]};
+const LS='archery-score.v1';
+let S={sessions:{},targets:{},prefs:clone(DEFAULT_PREFS),currentId:null,metaUpdated:0,deleted:{}};
+try{const raw=localStorage.getItem(LS);if(raw){const d=JSON.parse(raw);S={...S,...d,prefs:{...clone(DEFAULT_PREFS),...(d.prefs||{})}}}}catch(e){}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const allTargets=()=>[...BUILTIN,...Object.values(S.targets).sort((a,b)=>(a.created||0)-(b.created||0))];
+const getTarget=id=>BUILTIN.find(t=>t.id===id)||S.targets[id]||BUILTIN[0];
+const allRounds=()=>[...ROUNDS,...(S.prefs.rounds||[])];
+const cur=()=>S.currentId&&S.sessions[S.currentId]&&!S.sessions[S.currentId].done?S.sessions[S.currentId]:null;
+function touchSession(s){s.updatedAt=Date.now();saveLocal();queueRemote('s_'+s.id);if(s.done&&MYB&&MYB.entries[s.id])boardPut(s)}
+function touchMeta(){S.metaUpdated=Date.now();saveLocal();queueRemote('meta')}
+function deleteSession(id){if(MYB&&MYB.entries[id])boardRemove(id);delete S.sessions[id];S.deleted[id]=Date.now();if(S.currentId===id)S.currentId=null;touchMeta();queueRemote('s_'+id)}
+
+/* ================= Account sync (db capability) ================= */
+let COLL=null;const remoteAt={};const timers={};const writing=new Set();const again=new Set();
+function setSync(st){const el=$('#sync');el.className='sync '+({ok:'ok',busy:'busy',err:'err'}[st]||'');
+  $('span',el).textContent={local:'บันทึกในเครื่อง',loading:'กำลังโหลด…',ok:'ซิงก์บัญชีแล้ว',busy:'กำลังบันทึก…',err:'ซิงก์ไม่สำเร็จ',offline:'ออฟไลน์ · เก็บในเครื่อง'}[st]||st}
+function queueRemote(key){if(!COLL)return;clearTimeout(timers[key]);timers[key]=setTimeout(()=>flush(key),700)}
+async function flush(key){
+  if(!COLL)return;if(writing.has(key)){again.add(key);return}
+  writing.add(key);setSync('busy');
+  try{const ref=COLL.doc(key);
+    if(key==='meta'){await ref.set({updatedAt:S.metaUpdated,targets:S.targets,prefs:S.prefs,currentId:S.currentId||null,deleted:S.deleted});remoteAt.meta=S.metaUpdated}
+    else{const id=key.slice(2),s=S.sessions[id];if(!s){await ref.delete();delete remoteAt[key]}else{await ref.set({updatedAt:s.updatedAt,session:s});remoteAt[key]=s.updatedAt}}
+    setSync('ok');
+  }catch(e){setSync('err');if(e&&e.code==='quota_exceeded')toast('พื้นที่เก็บข้อมูลบัญชีเต็ม — ข้อมูลยังอยู่ในเครื่องนี้');else if(e&&e.code==='invalid_argument'){COLL=null;setSync('local')}}
+  finally{writing.delete(key);if(again.has(key)){again.delete(key);flush(key)}}
+}
+async function initRemote(){
+  if(!window.claude||!window.claude.use){setSync('local');return}
+  try{
+    const [user,db]=await Promise.all([window.claude.use('user'),window.claude.use('db')]);
+    if(!user||!db){setSync('local');return}
+    const id=await user.id();if(!id){setSync('local');return}
+    COLL=db.collection('data/users/'+id);setSync('loading');initBoard(db,user,id);
+    let to=setTimeout(()=>setSync('offline'),10000),first=true;
+    COLL.onSnapshot(snap=>{
+      let changed=false;const prevCur=S.currentId;
+      snap.docs.forEach(d=>{const v=d.data()||{};const at=v.updatedAt||0;remoteAt[d.id]=at;
+        if(d.id==='meta'){if(at>(S.metaUpdated||0)){S.targets=v.targets||{};S.prefs={...clone(DEFAULT_PREFS),...(v.prefs||{})};S.currentId=v.currentId||null;S.deleted={...(v.deleted||{}),...S.deleted};S.metaUpdated=at;changed=true}}
+        else if(d.id.startsWith('s_')&&v.session){const sid=d.id.slice(2);if(S.deleted[sid])return;const l=S.sessions[sid];if(!l||at>(l.updatedAt||0)){S.sessions[sid]=clone(v.session);changed=true}}
+      });
+      snap.docChanges().forEach(c=>{if(c.type==='removed'&&c.doc.id.startsWith('s_')&&!snap.metadata.fromCache){const sid=c.doc.id.slice(2),l=S.sessions[sid],at=(c.doc.data()||{}).updatedAt||0;if(l&&(l.updatedAt||0)<=at){delete S.sessions[sid];changed=true}}});
+      for(const sid in S.deleted){if(S.sessions[sid]){delete S.sessions[sid];changed=true}}
+      if(changed){saveLocal();refresh(prevCur!==S.currentId)}
+      if(!snap.metadata.fromCache){clearTimeout(to);setSync('ok');
+        if(first){first=false;setTimeout(()=>{ // upload anything newer that exists only on this device
+          if((S.metaUpdated||0)>(remoteAt.meta||0))queueRemote('meta');
+          Object.values(S.sessions).forEach(s=>{if((s.updatedAt||0)>(remoteAt['s_'+s.id]||0))queueRemote('s_'+s.id)});
+          Object.keys(S.deleted).forEach(sid=>{if(remoteAt['s_'+sid]!=null)queueRemote('s_'+sid)});
+        },50)}}
+    },err=>{clearTimeout(to);setSync(err&&err.code==='revoked'?'local':'offline')});
+  }catch(e){setSync('local')}
+}
+
+/* ================= Session helpers ================= */
+const flat=s=>s.ends.flat();
+const total=s=>flat(s).reduce((a,b)=>a+(b.v||0),0);
+function sStats(s){const arr=flat(s),t=s.target,n=arr.length,tot=arr.reduce((a,b)=>a+(b.v||0),0),mx=maxArrow(t);
+  const xs=arr.filter(a=>a.x).length,top=arr.filter(a=>a.x||a.v===mx).length,miss=arr.filter(a=>a.v===0&&!a.x).length;
+  return {n,tot,avg:n?tot/n:0,xs,top,miss,max:mx*(s.ends.length&&s.endsPlanned?s.endsPlanned*s.perEnd:n),mx,pctMax:n?tot/(n*mx)*100:0}}
+function sortedEnd(t,end){if(!S.prefs.sortEnd)return end;return [...end].sort((a,b)=>(b.v-a.v)||((b.x?1:0)-(a.x?1:0)))}
+function curEndInfo(s){const last=s.ends[s.ends.length-1];if(last&&last.length<s.perEnd)return {idx:s.ends.length-1,arrows:last};return {idx:s.ends.length,arrows:[]}}
+const isComplete=s=>s.endsPlanned>0&&s.ends.length>=s.endsPlanned&&s.ends[s.ends.length-1].length>=s.perEnd;
+function addArrow(a){
+  const s=cur();if(!s)return;
+  if(isComplete(s)){toast('ครบทุกชุดแล้ว — กด "จบรอบ" เพื่อบันทึก');return}
+  let last=s.ends[s.ends.length-1];
+  if(!last||last.length>=s.perEnd){s.ends.push([]);last=s.ends[s.ends.length-1]}
+  last.push(a);touchSession(s);
+  if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){}
+  renderShoot();
+  if(last.length>=s.perEnd){const st=last.reduce((x,y)=>x+y.v,0);toast(isComplete(s)?`ครบแล้ว! รวม ${total(s)} แต้ม`:`ชุดที่ ${s.ends.length}: ${st} แต้ม`)}
+}
+function undoArrow(){const s=cur();if(!s)return;const last=s.ends[s.ends.length-1];if(!last)return;last.pop();if(!last.length)s.ends.pop();touchSession(s);renderShoot()}
+
+/* ================= Views & navigation ================= */
+let VIEW='shoot';
+function show(v){VIEW=v;$$('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));$$('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));render();window.scrollTo(0,0)}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+function render(){({shoot:renderShoot,history:renderHistory,stats:renderStats,club:renderClub,targets:renderTargets,settings:renderSettings})[VIEW]()}
+function refresh(curChanged){applyTheme();if(VIEW==='shoot'&&!cur()&&!curChanged&&$('#newForm'))return;if(VIEW==='settings'&&document.activeElement&&document.activeElement.tagName==='INPUT')return;render()}
+
+/* ---------- Modal ---------- */
+function openModal(html,mount){$('#sheet').innerHTML=html;$('#modal').classList.add('on');document.body.style.overflow='hidden';mount&&mount($('#sheet'));$$('[data-close]',$('#sheet')).forEach(b=>b.onclick=closeModal)}
+function closeModal(){$('#modal').classList.remove('on');document.body.style.overflow='';$('#sheet').innerHTML=''}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+function confirmBox(title,msg,okLabel,cb,danger=true){openModal(`<h2>${esc(title)}</h2><p class="ink2" style="margin-top:0">${esc(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn" data-close>ยกเลิก</button><button class="btn ${danger?'danger':'pri'}" id="okb">${esc(okLabel)}</button></div>`,el=>{$('#okb',el).onclick=()=>{closeModal();cb()}})}
+const closeBtn='<button class="btn ghost sm x" data-close aria-label="ปิด">✕</button>';
+
+/* ================= SHOOT view ================= */
+function renderShoot(){
+  const el=$('#v-shoot');const s=cur();
+  if(!s){el.innerHTML=newSessionForm();mountNewForm(el);return}
+  const t=s.target,st=sStats(s),ce=curEndInfo(s),done=isComplete(s);
+  const planned=s.endsPlanned?`/${s.endsPlanned}`:'';
+  const slots=Array.from({length:s.perEnd},(_,i)=>ce.arrows[i]?chip(t,ce.arrows[i]):'<span class="slot"></span>').join('');
+  const endSum=ce.arrows.reduce((a,b)=>a+b.v,0);
+  const keys=keypadKeys(t).map((a,i)=>`<button data-k="${i}" style="${chipStyle(t,a)}">${esc(arrowLabel(t,a))}</button>`).join('');
+  let run=0;const rows=s.ends.map((e,i)=>{const sum=e.reduce((a,b)=>a+b.v,0);run+=sum;return `<tr class="click" data-end="${i}"><td class="n">${i+1}</td><td><div class="chips">${sortedEnd(t,e).map(a=>chip(t,a,'s')).join('')}</div></td><td class="r">${sum}</td><td class="r muted">${run}</td></tr>`}).reverse().join('');
+  el.innerHTML=`
+  <div class="card">
+    <div class="row" style="align-items:flex-start">
+      <div class="grow"><div style="font-weight:600">${esc(s.title)}</div>
+      <div class="tiny muted">${fmtDate(s.date)} · ${esc(s.bow||'—')} · ${s.dist?esc(s.dist)+' '+(s.unit==='yd'?'หลา':'ม.'):'ไม่ระบุระยะ'} · ${esc(t.name)}</div></div>
+      <button class="btn sm" id="editInfo">แก้ไข</button>
+    </div>
+    <div class="scorehead" style="margin-top:10px">
+      <div class="big">${st.tot}<small>${s.endsPlanned?'/ '+st.mx*s.perEnd*s.endsPlanned:''}</small></div>
+      <div class="kv"><div>ชุด<b>${Math.max(ce.idx+(ce.arrows.length?1:0),s.ends.length)}${planned}</b></div><div>เฉลี่ย/ลูก<b>${st.n?st.avg.toFixed(2):'–'}</b></div><div>${esc(t.x?t.x.label:'สูงสุด')}<b>${t.x?st.xs:st.top}</b></div><div>${t.x?esc(t.x.label)+'+'+st.mx:'พลาด'}<b>${t.x?st.top:st.miss}</b></div><div>ลูก<b>${st.n}</b></div></div>
+    </div>
+  </div>
+  <div class="card" style="padding:10px">
+    <div class="tgtwrap"><svg id="tsvg" viewBox="0 0 200 200">
+      <defs><clipPath id="lclip"><circle cx="0" cy="0" r="30"/></clipPath></defs>
+      <g id="face">${faceSVG(t)}</g><g id="marks">${marksSVG(s)}</g>
+      <g id="loupe" visibility="hidden"><circle r="31" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+        <g clip-path="url(#lclip)"><g id="lin"><use href="#face"/><use href="#marks"/></g></g>
+        <path d="M-8 0h5M3 0h5M0 -8v5M0 3v5" stroke="#00E5FF" stroke-width=".9"/><circle r="1.2" fill="none" stroke="#00E5FF" stroke-width=".6"/>
+        <rect id="lbg" x="-12" y="33" width="24" height="12" rx="6" fill="var(--ink)"/><text id="ltx" x="0" y="42" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--bg)" font-family="IBM Plex Sans Thai,sans-serif"></text>
+      </g>
+    </svg></div>
+    <div class="hint">${done?'ยิงครบทุกชุดแล้ว':'แตะ/ลากบนเป้าตรงจุดที่ลูกปัก แล้วปล่อยนิ้วเพื่อบันทึก — หรือกดปุ่มคะแนนด้านล่าง'}</div>
+    <div class="endbar"><span class="small muted" style="margin-right:2px">ชุด ${ce.idx+1}</span>${slots}<span class="grow"></span><b style="font-size:18px;font-variant-numeric:tabular-nums">${endSum}</b></div>
+    <div class="keypad">${keys}<button id="undo" ${st.n?'':'disabled'} aria-label="ย้อนกลับ" style="background:var(--surface2);color:var(--ink2);font-size:15px">↶ ย้อน</button></div>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">ตารางคะแนน</h2><span class="tiny muted">แตะแถวเพื่อแก้ไข</span></div>
+    ${rows?`<table class="ends"><thead><tr><th>#</th><th>ลูก</th><th style="text-align:right">ชุด</th><th style="text-align:right">สะสม</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">ยังไม่มีคะแนน เริ่มยิงได้เลย</div>'}
+  </div>
+  <div class="row" style="margin-bottom:12px"><button class="btn danger" id="discard">ทิ้งรอบนี้</button><span class="grow"></span><button class="btn ${done?'pri':'soft'}" id="finish" ${st.n?'':'disabled'}>✓ จบรอบ & บันทึก</button></div>`;
+  const keyArr=keypadKeys(t);
+  $$('.keypad button[data-k]',el).forEach(b=>b.onclick=()=>addArrow({...keyArr[+b.dataset.k],nx:null,ny:null,sp:0}));
+  $('#undo',el).onclick=undoArrow;
+  $('#finish',el).onclick=()=>finishSession(s);
+  $('#discard',el).onclick=()=>confirmBox('ทิ้งรอบนี้?','คะแนนทั้งหมดของรอบนี้จะถูกลบและกู้คืนไม่ได้','ลบทิ้ง',()=>{deleteSession(s.id);renderShoot()});
+  $('#editInfo',el).onclick=()=>editInfo(s);
+  $$('tr[data-end]',el).forEach(tr=>tr.onclick=()=>editEnd(s,+tr.dataset.end));
+  mountTargetInput($('#tsvg',el),s);
+}
+function keypadKeys(t){const out=[];if(t.x)out.push({v:Number(t.x.v)||0,x:true});const seen=new Set();for(let i=t.rings.length-1;i>=0;i--){const v=Number(t.rings[i].v)||0;if(!seen.has(v)){seen.add(v);out.push({v,x:false})}}if(!seen.has(0))out.push({v:0,x:false});return out}
+function marksSVG(s,opts={}){
+  const t=s.target,r=markR(t),ce=curEndInfo(s);let out='';
+  const all=opts.all||!cur()||cur().id!==s.id;
+  s.ends.forEach((e,ei)=>{const isCur=!all&&ei===ce.idx;if(!all&&!isCur&&!S.prefs.showPrev)return;
+    e.forEach((a,ai)=>{if(a.nx==null)return;const [x,y]=arrowXY(t,a);
+      if(isCur){out+=`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r*1.15).toFixed(2)}" fill="#0B0B0B" stroke="#00E5FF" stroke-width="${(r*.45).toFixed(2)}"/><text x="${x.toFixed(2)}" y="${(y+r*.42).toFixed(2)}" font-size="${(r*1.2).toFixed(2)}" text-anchor="middle" fill="#fff" font-weight="700" font-family="sans-serif">${ai+1}</text>`}
+      else out+=`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="#111" fill-opacity="${all?.75:.42}" stroke="#fff" stroke-opacity=".8" stroke-width="${(r*.3).toFixed(2)}"/>`;
+    })});
+  return out;
+}
+function mountTargetInput(svg,s){
+  const t=s.target,loupe=$('#loupe',svg),lin=$('#lin',svg),ltx=$('#ltx',svg),lbg=$('#lbg',svg);let active=false,pt=null;
+  const toSVG=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())};
+  const update=e=>{pt=toSVG(e);const x=Math.max(0,Math.min(200,pt.x)),y=Math.max(0,Math.min(200,pt.y));pt={x,y};
+    if(!S.prefs.loupe){loupe.setAttribute('visibility','hidden');return}
+    const z=3.2;let ly=y-48;if(ly<32)ly=y+48;const lx=Math.max(32,Math.min(168,x));
+    loupe.setAttribute('transform',`translate(${lx} ${ly})`);lin.setAttribute('transform',`scale(${z}) translate(${-x} ${-y})`);
+    const a=scorePoint(t,x,y);const lab=arrowLabel(t,a);ltx.textContent=lab;const w=Math.max(18,lab.length*6+10);lbg.setAttribute('x',-w/2);lbg.setAttribute('width',w);
+    loupe.setAttribute('visibility','visible')};
+  svg.addEventListener('pointerdown',e=>{if(isComplete(s)){toast('ครบทุกชุดแล้ว');return}active=true;try{svg.setPointerCapture(e.pointerId)}catch(_){}update(e);e.preventDefault()});
+  svg.addEventListener('pointermove',e=>{if(active)update(e)});
+  svg.addEventListener('pointerup',e=>{if(!active)return;active=false;loupe.setAttribute('visibility','hidden');update(e);loupe.setAttribute('visibility','hidden');addArrow(scorePoint(t,pt.x,pt.y))});
+  svg.addEventListener('pointercancel',()=>{active=false;loupe.setAttribute('visibility','hidden')});
+}
+function finishSession(s){s.done=true;s.finishedAt=Date.now();touchSession(s);if(BOARDC&&S.prefs.boardAuto!==false&&flat(s).length)boardPut(s);S.currentId=null;touchMeta();renderShoot();openDetail(s.id,true)}
+
+/* ---------- new session form ---------- */
+let formTarget=null;
+function newSessionForm(){
+  const last=S.prefs.last||{};const tid=formTarget||last.target||'wa10';
+  const rounds=allRounds().map(r=>`<option value="${esc(r.id)}">${esc(r.name)}${r.custom?' ★':''}</option>`).join('');
+  const tp=allTargets().map(t=>`<input type="radio" name="tg" id="tg_${t.id}" value="${t.id}" ${t.id===tid?'checked':''}><label for="tg_${t.id}">${targetThumb(t)}${esc(t.name)}</label>`).join('');
+  const recent=Object.values(S.sessions).filter(x=>x.done).sort((a,b)=>(b.finishedAt||b.updatedAt)-(a.finishedAt||a.updatedAt)).slice(0,3);
+  return `<form id="newForm" class="card" autocomplete="off">
+    <h2>เริ่มรอบยิงใหม่</h2>
+    <label class="f"><span>รูปแบบรอบ</span><select id="nf_round"><option value="">— กำหนดเอง —</option>${rounds}</select></label>
+    <label class="f"><span>ชื่อรอบ</span><input type="text" id="nf_title" value="${esc(last.title||'ซ้อมยิง')}" maxlength="60"></label>
+    <div class="grid2"><label class="f"><span>วันที่</span><input type="date" id="nf_date" value="${todayISO()}"></label>
+    <label class="f"><span>คันธนู / อุปกรณ์</span><input type="text" id="nf_bow" list="bowlist" value="${esc(last.bow||S.prefs.bows[0]||'')}" maxlength="40"><datalist id="bowlist">${S.prefs.bows.map(b=>`<option value="${esc(b)}">`).join('')}</datalist></label></div>
+    <div class="grid2"><label class="f"><span>ระยะ</span><input type="number" id="nf_dist" inputmode="decimal" min="0" step="any" value="${esc(last.dist??18)}"></label>
+    <label class="f"><span>หน่วย</span><select id="nf_unit"><option value="m">เมตร</option><option value="yd" ${last.unit==='yd'?'selected':''}>หลา</option></select></label></div>
+    <label class="f"><span>ชนิดเป้า</span></label><div class="tpick" id="nf_tp">${tp}</div>
+    <div class="grid2"><label class="f"><span>ลูกต่อชุด</span><input type="number" id="nf_per" inputmode="numeric" min="1" max="24" value="${last.perEnd||6}"></label>
+    <label class="f"><span>จำนวนชุด (0 = ไม่จำกัด)</span><input type="number" id="nf_ends" inputmode="numeric" min="0" max="200" value="${last.ends??10}"></label></div>
+    <label class="f"><span>บันทึกย่อ (สภาพอากาศ, เป้าหมาย, ปรับศูนย์ ฯลฯ)</span><input type="text" id="nf_note" maxlength="200" placeholder="ไม่บังคับ"></label>
+    <div class="row"><button type="button" class="btn sm" id="nf_saveRound">☆ บันทึกเป็นรูปแบบรอบ</button><span class="grow"></span><button type="submit" class="btn pri">เริ่มยิง →</button></div>
+  </form>
+  ${recent.length?`<div class="card"><h2>ล่าสุด</h2>${recent.map(sessRow).join('')}</div>`:`<div class="card"><h2>วิธีใช้</h2><div class="small ink2">1) เลือกรูปแบบรอบหรือกำหนดเอง 2) แตะบนรูปเป้าตรงจุดที่ลูกปัก (มีแว่นขยายช่วยเล็ง) หรือกดปุ่มคะแนน 3) กด "จบรอบ" แล้วดูสถิติ กลุ่มลูก และพัฒนาการได้ในแท็บ <b>สถิติ</b> · สร้างเป้าแบบของคุณเองได้ในแท็บ <b>ชนิดเป้า</b></div></div>`}`;
+}
+function mountNewForm(el){
+  const f=$('#newForm',el);
+  $('#nf_round',f).onchange=e=>{const r=allRounds().find(x=>x.id===e.target.value);if(!r)return;
+    $('#nf_title',f).value=r.id==='free'?'ซ้อมยิง':r.name.replace(' ★','');$('#nf_per',f).value=r.perEnd;$('#nf_ends',f).value=r.ends;$('#nf_dist',f).value=r.dist;$('#nf_unit',f).value=r.unit||'m';
+    const rb=$('#tg_'+CSS.escape(r.target),f);if(rb){rb.checked=true;rb.nextElementSibling.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}};
+  $$('input[name=tg]',f).forEach(r=>r.onchange=()=>{formTarget=r.value;const t=getTarget(r.value);const per={'tri-v':3,'tri-t':3,five:5}[t.layout];if(per)$('#nf_per',f).value=per});
+  const read=()=>({title:$('#nf_title',f).value.trim()||'ซ้อมยิง',date:$('#nf_date',f).value||todayISO(),bow:$('#nf_bow',f).value.trim(),dist:$('#nf_dist',f).value,unit:$('#nf_unit',f).value,target:($('input[name=tg]:checked',f)||{}).value||'wa10',perEnd:Math.max(1,Math.min(24,parseInt($('#nf_per',f).value)||6)),ends:Math.max(0,Math.min(200,parseInt($('#nf_ends',f).value)||0)),note:$('#nf_note',f).value.trim()});
+  $('#nf_saveRound',f).onclick=()=>{const v=read();openModal(`<h2>บันทึกรูปแบบรอบ ${closeBtn}</h2><label class="f"><span>ชื่อรูปแบบ</span><input type="text" id="rn" value="${esc(v.title)}"></label><div class="small muted" style="margin-bottom:12px">${esc(getTarget(v.target).name)} · ${v.perEnd} ลูก × ${v.ends||'∞'} ชุด · ${esc(v.dist)} ${v.unit==='yd'?'หลา':'ม.'}</div><button class="btn pri block" id="rs">บันทึก</button>`,m=>{$('#rs',m).onclick=()=>{S.prefs.rounds=S.prefs.rounds||[];S.prefs.rounds.push({id:'r_'+uid(),custom:1,name:$('#rn',m).value.trim()||v.title,target:v.target,perEnd:v.perEnd,ends:v.ends,dist:v.dist,unit:v.unit});touchMeta();closeModal();toast('บันทึกรูปแบบรอบแล้ว');renderShoot()}})};
+  f.onsubmit=e=>{e.preventDefault();const v=read();const t=getTarget(v.target);
+    const s={id:uid(),title:v.title,date:v.date,bow:v.bow,dist:v.dist,unit:v.unit,targetId:t.id,target:clone(t),perEnd:v.perEnd,endsPlanned:v.ends,note:v.note,ends:[],done:false,created:Date.now()};
+    S.sessions[s.id]=s;S.currentId=s.id;if(v.bow&&!S.prefs.bows.includes(v.bow))S.prefs.bows.push(v.bow);
+    S.prefs.last={title:v.title,bow:v.bow,dist:v.dist,unit:v.unit,target:v.target,perEnd:v.perEnd,ends:v.ends};formTarget=null;
+    touchSession(s);touchMeta();renderShoot();window.scrollTo(0,0)};
+  const sel=$('input[name=tg]:checked',f);if(sel)setTimeout(()=>sel.nextElementSibling.scrollIntoView({block:'nearest',inline:'center'}),0);
+  $$('.sess',el).forEach(r=>r.onclick=()=>openDetail(r.dataset.id));
+}
+function editInfo(s){
+  openModal(`<h2>ข้อมูลรอบยิง ${closeBtn}</h2>
+   <label class="f"><span>ชื่อรอบ</span><input type="text" id="ei_t" value="${esc(s.title)}"></label>
+   <div class="grid2"><label class="f"><span>วันที่</span><input type="date" id="ei_d" value="${esc(s.date)}"></label><label class="f"><span>คันธนู</span><input type="text" id="ei_b" list="bl2" value="${esc(s.bow)}"><datalist id="bl2">${S.prefs.bows.map(b=>`<option value="${esc(b)}">`).join('')}</datalist></label></div>
+   <div class="grid3"><label class="f"><span>ระยะ</span><input type="number" id="ei_r" value="${esc(s.dist)}"></label><label class="f"><span>หน่วย</span><select id="ei_u"><option value="m">เมตร</option><option value="yd" ${s.unit==='yd'?'selected':''}>หลา</option></select></label><label class="f"><span>จำนวนชุด</span><input type="number" id="ei_e" min="0" value="${s.endsPlanned}"></label></div>
+   <label class="f"><span>บันทึกย่อ</span><input type="text" id="ei_n" value="${esc(s.note)}"></label>
+   <button class="btn pri block" id="ei_s">บันทึก</button>`,m=>{$('#ei_s',m).onclick=()=>{s.title=$('#ei_t',m).value.trim()||s.title;s.date=$('#ei_d',m).value||s.date;s.bow=$('#ei_b',m).value.trim();s.dist=$('#ei_r',m).value;s.unit=$('#ei_u',m).value;s.endsPlanned=Math.max(0,parseInt($('#ei_e',m).value)||0);s.note=$('#ei_n',m).value.trim();touchSession(s);closeModal();render()}});
+}
+function editEnd(s,i){
+  const t=s.target;const draw=m=>{const e=s.ends[i]||[];
+    $('#ee_ch',m).innerHTML=e.length?e.map((a,k)=>`<button class="btn sm" data-del="${k}" style="${chipStyle(t,a)};border-radius:999px">${esc(arrowLabel(t,a))} ✕</button>`).join(''):'<span class="muted small">ไม่มีลูกในชุดนี้</span>';
+    $('#ee_sum',m).textContent=e.reduce((a,b)=>a+b.v,0);
+    $$('[data-del]',m).forEach(b=>b.onclick=()=>{e.splice(+b.dataset.del,1);touchSession(s);draw(m)});
+    $$('#ee_kp button',m).forEach(b=>b.disabled=e.length>=s.perEnd);};
+  const kk=keypadKeys(t);
+  openModal(`<h2>แก้ไขชุดที่ ${i+1} ${closeBtn}</h2><div class="small muted" style="margin-bottom:8px">แตะลูกเพื่อลบ แล้วกดปุ่มคะแนนเพื่อเพิ่มใหม่ · รวม <b id="ee_sum"></b></div><div class="row" id="ee_ch" style="gap:6px"></div><div class="keypad" id="ee_kp">${kk.map((a,k)=>`<button data-k="${k}" style="${chipStyle(t,a)}">${esc(arrowLabel(t,a))}</button>`).join('')}</div><div class="row" style="margin-top:14px"><button class="btn danger sm" id="ee_rm">ลบทั้งชุด</button><span class="grow"></span><button class="btn pri" data-close>เสร็จ</button></div>`,m=>{
+    draw(m);$$('#ee_kp button',m).forEach(b=>b.onclick=()=>{const e=s.ends[i];if(e.length>=s.perEnd)return;e.push({...kk[+b.dataset.k],nx:null,ny:null,sp:0});touchSession(s);draw(m)});
+    $('#ee_rm',m).onclick=()=>{s.ends.splice(i,1);touchSession(s);closeModal();render()};
+    const oc=closeModal;$$('[data-close]',m).forEach(b=>b.onclick=()=>{s.ends=s.ends.filter(e=>e.length);touchSession(s);oc();render()});
+  });
+}
+
+/* ================= HISTORY ================= */
+function sessRow(s){const st=sStats(s),t=s.target;return `<div class="sess" data-id="${s.id}">${targetThumb(t,{extra:marksSVG(s,{all:true}),rx:10})}
+  <div class="grow"><div class="t">${esc(s.title)}${s.done?'':' <span class="tag acc">กำลังยิง</span>'}</div><div class="tiny muted">${fmtDate(s.date)} · ${esc(s.bow||'—')} · ${s.dist?esc(s.dist)+(s.unit==='yd'?' หลา':' ม.'):''} · ${st.n} ลูก</div></div>
+  <div class="sc"><b>${st.tot}</b><span class="tiny muted">เฉลี่ย ${st.n?st.avg.toFixed(2):'–'}</span></div></div>`}
+let histQ='';
+function renderHistory(){
+  const el=$('#v-history');const list=Object.values(S.sessions).filter(s=>flat(s).length||!s.done).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0));
+  const q=histQ.toLowerCase();const f=q?list.filter(s=>[s.title,s.bow,s.note,s.target.name,s.dist].join(' ').toLowerCase().includes(q)):list;
+  el.innerHTML=`<div class="card"><div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">ประวัติการยิง</h2><span class="tiny muted">${list.length} รอบ</span></div>
+   <input type="text" id="hq" placeholder="ค้นหา ชื่อรอบ คันธนู ระยะ บันทึกย่อ…" value="${esc(histQ)}" style="margin-bottom:6px">
+   <div id="hl">${f.length?f.map(sessRow).join(''):'<div class="empty">ยังไม่มีประวัติ — เริ่มยิงรอบแรกได้ในแท็บ "ยิง"</div>'}</div></div>`;
+  const hq=$('#hq',el);hq.oninput=()=>{histQ=hq.value;const p=hq.selectionStart;renderHistory();const n=$('#hq');n.focus();n.setSelectionRange(p,p)};
+  $$('.sess',el).forEach(r=>r.onclick=()=>openDetail(r.dataset.id));
+}
+function groupInfo(arrows){const p=arrows.filter(a=>a.nx!=null);if(p.length<2)return null;const mx=p.reduce((a,b)=>a+b.nx,0)/p.length,my=p.reduce((a,b)=>a+b.ny,0)/p.length;
+  const sd=Math.sqrt(p.reduce((a,b)=>a+(b.nx-mx)**2+(b.ny-my)**2,0)/p.length);const off=Math.hypot(mx,my);
+  let hr=Math.round(((Math.atan2(mx,-my)*180/Math.PI+360)%360)/30);if(hr===0)hr=12;return {n:p.length,mx,my,sd,off,hr}}
+function groupText(g){if(!g)return 'ยังมีลูกที่บันทึกตำแหน่งไม่พอ (ต้องแตะบนเป้าอย่างน้อย 2 ลูก)';
+  const off=Math.round(g.off*100),sd=Math.round(g.sd*100);
+  return (off<4?'กลุ่มลูกอยู่กลางเป้าดีมาก':`จุดศูนย์กลางกลุ่มเยื้องไปทาง <b>${g.hr} นาฬิกา</b> ประมาณ <b>${off}%</b> ของรัศมีเป้า`)+` · การกระจาย (SD) <b>${sd}%</b> ของรัศมี · จาก ${g.n} ลูก`}
+function groupOverlay(t,g,spot){if(!g)return '';const [cx,cy,R]=spot||spotsOf(t)[0];const x=cx+g.mx*R,y=cy+g.my*R;
+  return `<circle cx="${x}" cy="${y}" r="${(g.sd*R).toFixed(2)}" fill="none" stroke="#00E5FF" stroke-width="${(R*.014).toFixed(2)}" stroke-dasharray="${R*.04} ${R*.03}"/><path d="M${x-R*.06} ${y}h${R*.12}M${x} ${y-R*.06}v${R*.12}" stroke="#00E5FF" stroke-width="${(R*.02).toFixed(2)}"/>`}
+function openDetail(id,justFinished){
+  const s=S.sessions[id];if(!s)return;const t=s.target,st=sStats(s),g=groupInfo(flat(s));
+  let run=0;const rows=s.ends.map((e,i)=>{const sum=e.reduce((a,b)=>a+b.v,0);run+=sum;return `<tr><td class="n">${i+1}</td><td><div class="chips">${sortedEnd(t,e).map(a=>chip(t,a,'s')).join('')}</div></td><td class="r">${sum}</td><td class="r muted">${run}</td></tr>`}).join('');
+  const dist=keypadKeys(t).map(k=>{const c=flat(s).filter(a=>k.x?a.x:(!a.x&&a.v===k.v)).length;return c?`<span style="display:inline-flex;align-items:center;gap:4px;margin:0 8px 6px 0">${chip(t,k,'s')}<span class="small">× ${c}</span></span>`:''}).join('');
+  openModal(`<h2>${justFinished?'🎯 ':''}${esc(s.title)} ${closeBtn}</h2>
+   <div class="tiny muted" style="margin-top:-8px;margin-bottom:10px">${fmtDate(s.date)} · ${esc(s.bow||'—')} · ${s.dist?esc(s.dist)+(s.unit==='yd'?' หลา':' ม.'):'ไม่ระบุระยะ'} · ${esc(t.name)}${s.note?' · '+esc(s.note):''}</div>
+   <div class="tiles" style="margin-bottom:12px"><div class="tile"><div class="l">คะแนนรวม</div><div class="v">${st.tot}</div><div class="d">${r1(st.pctMax)}% ของเต็ม</div></div>
+   <div class="tile"><div class="l">เฉลี่ย/ลูก</div><div class="v">${st.n?st.avg.toFixed(2):'–'}</div><div class="d">${st.n} ลูก · ${s.ends.length} ชุด</div></div>
+   <div class="tile"><div class="l">${t.x?esc(t.x.label)+' / '+esc(t.x.label)+'+'+st.mx:'แต้มสูงสุด'}</div><div class="v">${t.x?st.xs+' / '+st.top:st.top}</div><div class="d">${pct(st.top,st.n)}% ของลูกทั้งหมด</div></div>
+   <div class="tile"><div class="l">พลาด (M)</div><div class="v">${st.miss}</div><div class="d">${pct(st.miss,st.n)}%</div></div></div>
+   <div style="max-width:340px;margin:0 auto">${targetThumb(t,{extra:marksSVG(s,{all:true})+(t.layout==='single'?groupOverlay(t,g):''),attr:'style="width:100%;border-radius:12px"'})}</div>
+   <div class="note">${groupText(g)}</div>
+   <div style="margin:12px 0 4px">${dist}</div>
+   ${rows?`<table class="ends"><thead><tr><th>#</th><th>ลูก</th><th style="text-align:right">ชุด</th><th style="text-align:right">สะสม</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+   <div class="row" style="margin-top:14px"><button class="btn danger sm" id="d_del">ลบ</button><button class="btn sm" id="d_copy">คัดลอกสรุป</button><span class="grow"></span>
+   ${BOARDC&&s.done&&flat(s).length?`<button class="btn sm" id="d_board">${MYB&&MYB.entries[s.id]?'เอาออกจากกระดาน':'🏆 ส่งขึ้นกระดาน'}</button>`:''}${s.done?'<button class="btn sm" id="d_resume">ยิงต่อ</button>':''}<button class="btn soft sm" id="d_again">ยิงซ้ำแบบนี้</button></div>`,m=>{
+    $('#d_del',m).onclick=()=>confirmBox('ลบรอบยิงนี้?',`${s.title} (${fmtDate(s.date)}) จะถูกลบถาวร`,'ลบ',()=>{deleteSession(s.id);render()});
+    $('#d_copy',m).onclick=async()=>{const txt=`${s.title} — ${fmtDate(s.date)}\n${t.name} · ${s.dist||''}${s.unit==='yd'?' หลา':' ม.'} · ${s.bow||''}\nรวม ${st.tot} แต้ม (${st.n} ลูก, เฉลี่ย ${st.avg.toFixed(2)})${t.x?` · ${t.x.label}: ${st.xs}`:''}\n`+s.ends.map((e,i)=>`ชุด ${i+1}: ${sortedEnd(t,e).map(a=>arrowLabel(t,a)).join(' ')} = ${e.reduce((a,b)=>a+b.v,0)}`).join('\n');
+      try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว')}catch(e){showText('สรุปผล',txt)}};
+    const db_=$('#d_board',m);if(db_)db_.onclick=()=>{if(MYB.entries[s.id]){boardRemove(s.id);toast('เอาออกจากกระดานแล้ว')}else{boardPut(s);toast('ส่งขึ้นกระดานชมรมแล้ว')}closeModal();openDetail(s.id)};
+    const rs=$('#d_resume',m);if(rs)rs.onclick=()=>{const c=cur();if(c&&c.id!==s.id){toast('มีรอบที่กำลังยิงอยู่ — จบรอบนั้นก่อน');return}s.done=false;S.currentId=s.id;touchSession(s);touchMeta();closeModal();show('shoot')};
+    $('#d_again',m).onclick=()=>{S.prefs.last={title:s.title,bow:s.bow,dist:s.dist,unit:s.unit,target:s.targetId,perEnd:s.perEnd,ends:s.endsPlanned};if(!S.targets[s.targetId]&&!BUILTIN.find(b=>b.id===s.targetId)){const nt=clone(s.target);nt.id=s.targetId;nt.builtin=0;S.targets[nt.id]=nt}touchMeta();closeModal();if(cur()){toast('มีรอบที่กำลังยิงอยู่');show('shoot');return}formTarget=s.targetId;show('shoot')};
+  });
+}
+
+/* ================= STATS ================= */
+const SF={target:'',bow:'',dist:'',period:'all'};
+function renderStats(){
+  const el=$('#v-stats');
+  const all=Object.values(S.sessions).filter(s=>flat(s).length).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.created||0)-(b.created||0));
+  if(!all.length){el.innerHTML='<div class="card"><h2>สถิติ</h2><div class="empty">ยังไม่มีข้อมูล ยิงและบันทึกอย่างน้อย 1 รอบเพื่อดูสถิติ</div></div>';return}
+  const uniq=f=>[...new Set(all.map(f).filter(v=>v!==''&&v!=null))];
+  const tids=uniq(s=>s.targetId),bows=uniq(s=>s.bow),dists=uniq(s=>s.dist?s.dist+'|'+(s.unit||'m'):'');
+  const tname=id=>{const s=all.find(x=>x.targetId===id);return s?s.target.name:id};
+  let f=all.filter(s=>(!SF.target||s.targetId===SF.target)&&(!SF.bow||s.bow===SF.bow)&&(!SF.dist||(s.dist+'|'+(s.unit||'m'))===SF.dist));
+  if(SF.period==='30'||SF.period==='90'){const lim=new Date(Date.now()-(+SF.period)*864e5).toISOString().slice(0,10);f=f.filter(s=>s.date>=lim)}
+  if(SF.period==='10')f=f.slice(-10);
+  const opt=(v,l,sel)=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(l)}</option>`;
+  const arrows=f.flatMap(flat),n=arrows.length,tot=arrows.reduce((a,b)=>a+b.v,0);
+  const best=f.reduce((b,s)=>{const st=sStats(s);return !b||st.pctMax>b.st.pctMax?{s,st}:b},null);
+  const xs=arrows.filter(a=>a.x).length;
+  const topN=f.reduce((a,s)=>a+sStats(s).top,0),miss=arrows.filter(a=>a.v===0&&!a.x).length;
+  const pctAll=f.reduce((a,s)=>{const st=sStats(s);return a+st.tot},0)/Math.max(1,f.reduce((a,s)=>a+sStats(s).n*sStats(s).mx,0))*100;
+  // group target: chosen target or most used
+  const gT=SF.target||(()=>{const c={};f.forEach(s=>c[s.targetId]=(c[s.targetId]||0)+flat(s).length);return Object.keys(c).sort((a,b)=>c[b]-c[a])[0]})();
+  const gS=f.filter(s=>s.targetId===gT);const gTarget=gS.length?gS[gS.length-1].target:null;
+  el.innerHTML=`
+  <div class="card"><h2>ตัวกรอง</h2><div class="filters">
+    <select id="sf_t">${opt('','ทุกชนิดเป้า',SF.target)}${tids.map(i=>opt(i,tname(i),SF.target)).join('')}</select>
+    <select id="sf_b">${opt('','ทุกคันธนู',SF.bow)}${bows.map(b=>opt(b,b,SF.bow)).join('')}</select>
+    <select id="sf_d">${opt('','ทุกระยะ',SF.dist)}${dists.map(d=>{const [v,u]=d.split('|');return opt(d,v+(u==='yd'?' หลา':' ม.'),SF.dist)}).join('')}</select>
+    <select id="sf_p">${opt('all','ทั้งหมด',SF.period)}${opt('10','10 รอบล่าสุด',SF.period)}${opt('30','30 วัน',SF.period)}${opt('90','90 วัน',SF.period)}</select>
+  </div></div>
+  ${!f.length?'<div class="card"><div class="empty">ไม่มีรอบยิงที่ตรงกับตัวกรอง</div></div>':`
+  <div class="card"><div class="tiles">
+    <div class="tile"><div class="l">รอบยิง</div><div class="v">${f.length}</div><div class="d">${n.toLocaleString()} ลูก</div></div>
+    <div class="tile"><div class="l">เฉลี่ย/ลูก</div><div class="v">${(tot/n).toFixed(2)}</div><div class="d">${r1(pctAll)}% ของคะแนนเต็ม</div></div>
+    <div class="tile"><div class="l">รอบที่ดีที่สุด</div><div class="v">${best.st.tot}</div><div class="d">${esc(best.s.title)} · ${fmtDate(best.s.date)}</div></div>
+    <div class="tile"><div class="l">วงในสุด (X/สูงสุด)</div><div class="v">${pct(topN,n)}%</div><div class="d">X ${xs} ลูก</div></div>
+    <div class="tile"><div class="l">พลาด (M)</div><div class="v">${pct(miss,n)}%</div><div class="d">${miss} ลูก</div></div>
+  </div></div>
+  <div class="card"><h2>พัฒนาการ: คะแนนเฉลี่ยต่อลูก</h2><div class="chart" id="ch_trend"></div></div>
+  <div class="card"><h2>การกระจายคะแนน</h2><div class="chart" id="ch_dist"></div>${SF.target?'':'<div class="tiny muted">รวมทุกชนิดเป้า — เลือกชนิดเป้าในตัวกรองเพื่อดูตามวงของเป้านั้น</div>'}</div>
+  <div class="card"><h2>กลุ่มลูก (Group) ${gTarget?'· '+esc(gTarget.name):''}</h2>
+    ${gTarget?`<div style="max-width:360px;margin:0 auto" id="grp"></div><div class="note" id="grpTxt"></div><div class="tiny muted" style="margin-top:6px">จุดทุกลูกถูกย้ายมาซ้อนบนเป้าเดียว (กรณีเป้าหลายจุด) · วงประสีฟ้า = รัศมี 1 SD รอบจุดศูนย์กลางกลุ่ม</div>`:'<div class="empty">ไม่มีข้อมูล</div>'}</div>
+  <div class="card"><h2>คะแนนเฉลี่ยตามลำดับชุด</h2><div class="chart" id="ch_end"></div><div class="tiny muted">ดูว่าความแม่นตกลงช่วงท้ายรอบ (ความล้า) หรือต้องใช้เวลาวอร์มอัพหรือไม่</div></div>`}`;
+  $('#sf_t',el).onchange=e=>{SF.target=e.target.value;renderStats()};$('#sf_b',el).onchange=e=>{SF.bow=e.target.value;renderStats()};
+  $('#sf_d',el).onchange=e=>{SF.dist=e.target.value;renderStats()};$('#sf_p',el).onchange=e=>{SF.period=e.target.value;renderStats()};
+  if(!f.length)return;
+  // trend
+  lineChart($('#ch_trend',el),f.map(s=>{const st=sStats(s);return {label:fmtDate(s.date),value:st.avg,tip:`<b>${esc(s.title)}</b><br>${fmtDate(s.date)} · ${esc(s.bow||'')}<br>เฉลี่ย ${st.avg.toFixed(2)} · รวม ${st.tot} (${st.n} ลูก)`}}),{fmt:v=>v.toFixed(1)});
+  // distribution
+  let bars;
+  if(SF.target&&gTarget){bars=keypadKeys(gTarget).map(k=>{const c=arrows.filter(a=>k.x?a.x:(!a.x&&a.v===k.v)).length;return {label:arrowLabel(gTarget,k),value:pct(c,n),swatch:k.v===0&&!k.x?null:(ringFor(gTarget,k)||{}).fill,tip:`<b>${esc(arrowLabel(gTarget,k))}</b>: ${c} ลูก (${pct(c,n)}%)`}})}
+  else{const m={};arrows.forEach(a=>{const k=a.x?'X':a.v===0?'M':String(a.v);m[k]=(m[k]||0)+1});
+    const keys=Object.keys(m).sort((a,b)=>(a==='X'?-1:b==='X'?1:a==='M'?1:b==='M'?-1:+b-+a));
+    bars=keys.map(k=>({label:k,value:pct(m[k],n),tip:`<b>${k}</b>: ${m[k]} ลูก (${pct(m[k],n)}%)`}))}
+  barChart($('#ch_dist',el),bars,{fmt:v=>v+'%'});
+  // group
+  if(gTarget){const ga=gS.flatMap(flat).filter(a=>a.nx!=null);const g=groupInfo(ga);const single={...gTarget,layout:'single'};const R=96;
+    const dots=ga.map(a=>`<circle cx="${(100+a.nx*R).toFixed(2)}" cy="${(100+a.ny*R).toFixed(2)}" r="2.3" fill="#111" fill-opacity=".55" stroke="#fff" stroke-opacity=".7" stroke-width=".6"/>`).join('');
+    $('#grp',el).innerHTML=targetThumb(single,{extra:dots+groupOverlay(single,g),attr:'style="width:100%;border-radius:12px"'});
+    $('#grpTxt',el).innerHTML=groupText(g)+(gS.length?` <span class="muted">· ${gS.length} รอบ</span>`:'');}
+  // per end
+  const per=[];f.forEach(s=>s.ends.forEach((e,i)=>{if(!e.length)return;per[i]=per[i]||{s:0,n:0};per[i].s+=e.reduce((a,b)=>a+b.v,0);per[i].n+=e.length}));
+  barChart($('#ch_end',el),per.map((p,i)=>p?{label:String(i+1),value:r2(p.s/p.n),tip:`<b>ชุดที่ ${i+1}</b><br>เฉลี่ย ${(p.s/p.n).toFixed(2)} ต่อลูก · ${p.n} ลูก`}:{label:String(i+1),value:0,tip:'ไม่มีข้อมูล'}),{fmt:v=>v.toFixed(1),minZero:true});
+}
+
+/* ---------- tiny chart library ---------- */
+function niceTicks(lo,hi,k=4){const span=hi-lo||1;const step0=span/k;const mag=Math.pow(10,Math.floor(Math.log10(step0)));const step=[1,2,2.5,5,10].map(m=>m*mag).find(s=>s>=step0);const a=Math.floor(lo/step)*step,b=Math.ceil(hi/step)*step;const t=[];for(let v=a;v<=b+1e-9;v+=step)t.push(Math.round(v*1000)/1000);return t}
+function chartFrame(host){host.innerHTML='';const W=Math.max(260,host.clientWidth||320);const tip=document.createElement('div');tip.className='tip';host.appendChild(tip);return {W,tip}}
+function showTip(host,tip,x,y,html){tip.innerHTML=html;tip.style.display='block';const W=host.clientWidth;const tw=tip.offsetWidth;let cx=Math.max(tw/2+2,Math.min(W-tw/2-2,x));tip.style.left=cx+'px';tip.style.top=y+'px'}
+function lineChart(host,pts,o={}){
+  const {W,tip}=chartFrame(host);const H=210,P={l:34,r:14,t:14,b:26};
+  const vals=pts.map(p=>p.value);let lo=Math.min(...vals),hi=Math.max(...vals);if(hi-lo<.5){lo-=.5;hi+=.5}
+  const ticks=niceTicks(lo-(hi-lo)*.08,hi+(hi-lo)*.08);lo=ticks[0];hi=ticks[ticks.length-1];
+  const X=i=>pts.length===1?(P.l+(W-P.l-P.r)/2):P.l+i*(W-P.l-P.r)/(pts.length-1),Y=v=>P.t+(1-(v-lo)/(hi-lo))*(H-P.t-P.b);
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟเส้นคะแนนเฉลี่ย">`;
+  ticks.forEach(v=>{s+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${P.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${o.fmt?o.fmt(v):v}</text>`});
+  const every=Math.ceil(pts.length/Math.max(2,Math.floor((W-P.l-P.r)/70)));
+  pts.forEach((p,i)=>{if(i%every===0||i===pts.length-1&&pts.length<40&&(i%every)>every/2)s+=`<text x="${X(i)}" y="${H-7}" text-anchor="${pts.length>1&&i===0?'start':pts.length>1&&i===pts.length-1?'end':'middle'}" font-size="11" fill="var(--muted)">${esc(p.label)}</text>`});
+  if(pts.length>1)s+=`<path d="${pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.value).toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const dotR=pts.length>40?0:4;pts.forEach((p,i)=>{if(dotR)s+=`<circle cx="${X(i)}" cy="${Y(p.value)}" r="${dotR}" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`});
+  s+=`<line id="hx" y1="${P.t}" y2="${H-P.b}" stroke="var(--ink2)" stroke-dasharray="3 3" visibility="hidden"/><circle id="hd" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><rect x="${P.l-10}" y="0" width="${W-P.l-P.r+20}" height="${H}" fill="transparent" id="hov"/></svg>`;
+  host.insertAdjacentHTML('beforeend',s);const svg=host.querySelector('svg'),hx=$('#hx',svg),hd=$('#hd',svg);
+  const mv=e=>{const r=svg.getBoundingClientRect();const x=e.clientX-r.left;let i=pts.length===1?0:Math.round((x-P.l)/((W-P.l-P.r)/(pts.length-1)));i=Math.max(0,Math.min(pts.length-1,i));
+    hx.setAttribute('x1',X(i));hx.setAttribute('x2',X(i));hx.setAttribute('visibility','visible');hd.setAttribute('cx',X(i));hd.setAttribute('cy',Y(pts[i].value));hd.setAttribute('visibility','visible');showTip(host,tip,X(i),Y(pts[i].value),pts[i].tip)};
+  const out=()=>{hx.setAttribute('visibility','hidden');hd.setAttribute('visibility','hidden');tip.style.display='none'};
+  const hov=$('#hov',svg);hov.addEventListener('pointermove',mv);hov.addEventListener('pointerdown',mv);hov.addEventListener('pointerleave',out);
+}
+function barChart(host,bars,o={}){
+  const {W,tip}=chartFrame(host);const H=200,P={l:38,r:8,t:12,b:bars.some(b=>b.swatch)?34:24};
+  if(!bars.length){host.insertAdjacentHTML('beforeend','<div class="empty">ไม่มีข้อมูล</div>');return}
+  const hi0=Math.max(...bars.map(b=>b.value),0.0001);const ticks=niceTicks(0,hi0);const hi=ticks[ticks.length-1];
+  const bw=(W-P.l-P.r)/bars.length,gap=Math.min(8,Math.max(2,bw*.22)),Y=v=>P.t+(1-v/hi)*(H-P.t-P.b),base=Y(0);
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟแท่ง">`;
+  ticks.forEach(v=>{s+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${P.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${o.fmt?o.fmt(v):v}</text>`});
+  const every=Math.ceil(bars.length/Math.floor((W-P.l-P.r)/22));
+  bars.forEach((b,i)=>{const x=P.l+i*bw+gap/2,w=Math.max(1,bw-gap),y=Y(b.value),h=base-y,rr=Math.min(4,w/2,h);
+    if(h>0.5)s+=`<path d="M${x} ${base}V${y+rr}Q${x} ${y} ${x+rr} ${y}H${x+w-rr}Q${x+w} ${y} ${x+w} ${y+rr}V${base}Z" fill="var(--accent)" data-i="${i}" class="bar"/>`;
+    if(i%every===0)s+=`<text x="${x+w/2}" y="${H-(b.swatch?18:7)}" text-anchor="middle" font-size="11" fill="var(--ink2)" font-weight="600">${esc(b.label)}</text>`;
+    if(b.swatch)s+=`<rect x="${x+w/2-7}" y="${H-12}" width="14" height="7" rx="3.5" fill="${b.swatch}" stroke="rgba(0,0,0,.25)" stroke-width=".6"/>`;
+    s+=`<rect x="${P.l+i*bw}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}" fill="transparent" data-h="${i}"/>`});
+  s+=`<line x1="${P.l}" x2="${W-P.r}" y1="${base}" y2="${base}" stroke="var(--ink2)" stroke-opacity=".5"/></svg>`;
+  host.insertAdjacentHTML('beforeend',s);const svg=host.querySelector('svg');
+  $$('[data-h]',svg).forEach(r=>{const i=+r.dataset.h;const on=()=>{$$('.bar',svg).forEach(b=>b.style.opacity=+b.dataset.i===i?1:.45);showTip(host,tip,P.l+i*bw+bw/2,Y(bars[i].value),bars[i].tip)};r.addEventListener('pointerenter',on);r.addEventListener('pointerdown',on);r.addEventListener('pointerleave',()=>{$$('.bar',svg).forEach(b=>b.style.opacity=1);tip.style.display='none'})});
+}
+let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(()=>{if(VIEW==='stats')renderStats()},200)});
+
+/* ================= TARGETS (gallery + editor) ================= */
+function renderTargets(){
+  const el=$('#v-targets');
+  const card=t=>{const cnt=Object.values(S.sessions).filter(s=>s.targetId===t.id).length;
+    return `<div class="gcard">${targetThumb(t,{labels:true})}<h3>${esc(t.name)}</h3>
+    <div>${t.builtin?'<span class="tag">มาตรฐาน</span>':'<span class="tag acc">สร้างเอง</span>'}<span class="tag">${LAYOUTS[t.layout]}</span><span class="tag">เต็ม ${maxArrow(t)}/ลูก</span>${t.use?`<span class="tag">${esc(t.use)}</span>`:''}${cnt?`<span class="tag">ใช้ ${cnt} รอบ</span>`:''}</div>
+    <p onclick="this.classList.toggle('open')">${esc(t.desc||'')}</p>
+    <div class="small ink2" style="margin-bottom:8px">คะแนน: ${keypadKeys(t).map(k=>chip(t,k,'s')).join(' ')}</div>
+    <div class="row">${t.builtin?`<button class="btn sm soft grow" data-copy="${t.id}">คัดลอกไปแก้ไข</button>`:`<button class="btn sm soft grow" data-edit="${t.id}">แก้ไข</button><button class="btn sm" data-copy="${t.id}">คัดลอก</button><button class="btn sm danger" data-del="${t.id}">ลบ</button>`}</div></div>`};
+  el.innerHTML=`<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">ชนิดเป้า</h2><div class="small muted">รูปเป้าพร้อมคะแนนแต่ละวง · สร้างเป้าของคุณเองได้ไม่จำกัด</div></div><button class="btn pri" id="newT">＋ สร้างเป้าเอง</button></div></div>
+   <div class="gal">${allTargets().map(card).join('')}</div>`;
+  $('#newT',el).onclick=()=>editTarget(null);
+  $$('[data-edit]',el).forEach(b=>b.onclick=()=>editTarget(clone(S.targets[b.dataset.edit])));
+  $$('[data-copy]',el).forEach(b=>b.onclick=()=>{const t=clone(getTarget(b.dataset.copy));t.id='t_'+uid();t.name=t.name+' (ของฉัน)';delete t.builtin;delete t.use;editTarget(t,true)});
+  $$('[data-del]',el).forEach(b=>b.onclick=()=>{const t=S.targets[b.dataset.del];confirmBox('ลบเป้านี้?',`"${t.name}" จะถูกลบ (รอบยิงเก่าที่ใช้เป้านี้ยังเก็บรูปเป้าไว้ครบ)`,'ลบ',()=>{delete S.targets[t.id];touchMeta();renderTargets()})});
+}
+const SCHEMES={
+  wa:{name:'WA 5 สี',f:(i,n)=>{const ord=['g','r','b','k','w'];const c=C[ord[Math.floor((n-1-i)/2)%5]];return c}},
+  wa1:{name:'WA 5 สี (สีละวง)',f:(i,n)=>{const ord=['g','r','b','k','w'];return C[ord[(n-1-i)%5]]}},
+  bw:{name:'ขาว-ดำ สลับ',f:i=>i%2?['#232323','#FFFFFF']:['#FFFFFF','#222222']},
+  green:{name:'เขียว ไล่เข้ม',f:(i,n)=>[mix('#E3F1E6','#1D6B47',n>1?i/(n-1):1),i/(n-1||1)>.5?'#FFFFFF':'#1D3B2A']},
+  fire:{name:'แดง → เหลือง',f:(i,n)=>[mix('#B3261E','#F8D52A',n>1?i/(n-1):1),'#2a1a10']},
+  blue:{name:'NFAA น้ำเงิน-ขาว',f:(i,n)=>i===n-1?['#FFFFFF','#1F5FA8']:['#1F5FA8','#FFFFFF']},
+  earth:{name:'โทนดิน (3D)',f:(i,n)=>[mix('#6E5C40','#D8C7A0',n>1?i/(n-1):1),'#2F271B']},
+};
+function editTarget(t,isNew){
+  const ed=t||{id:'t_'+uid(),name:'เป้าของฉัน',desc:'',layout:'single',rings:ringsWA(1),x:{v:10,label:'X',r:.5}};
+  if(!ed.created)ed.created=Date.now();
+  const ringsHTML=()=>ed.rings.map((r,i)=>i).reverse().map(i=>{const r=ed.rings[i];return `<div class="ringrow" data-i="${i}"><input type="color" value="${r.fill}" data-k="fill" title="สีวง"><input type="color" value="${r.line}" data-k="line" title="สีเส้น/ตัวเลข"><input type="text" value="${esc(r.label)}" data-k="label" placeholder="ป้าย" maxlength="4"><input type="number" value="${r.v}" data-k="v" placeholder="คะแนน" inputmode="decimal" step="any"><button class="btn sm ghost" data-rm="${i}" aria-label="ลบวง">✕</button></div>`}).join('');
+  openModal(`<h2>${t&&!isNew?'แก้ไขเป้า':'สร้างเป้าเอง'} ${closeBtn}</h2>
+   <div style="max-width:260px;margin:0 auto 12px" id="te_prev"></div>
+   <label class="f"><span>ชื่อเป้า</span><input type="text" id="te_n" value="${esc(ed.name)}" maxlength="50"></label>
+   <label class="f"><span>คำอธิบาย / ใช้กับอะไร</span><input type="text" id="te_d" value="${esc(ed.desc||'')}" maxlength="200" placeholder="เช่น เป้าซ้อมที่สนามบ้าน 30 ม."></label>
+   <label class="f"><span>รูปแบบหน้าเป้า</span><select id="te_l">${Object.entries(LAYOUTS).map(([k,v])=>`<option value="${k}" ${ed.layout===k?'selected':''}>${v}</option>`).join('')}</select></label>
+   <div class="card" style="box-shadow:none;background:var(--surface2);border:0;padding:12px">
+     <h3>สร้างวงอัตโนมัติ</h3>
+     <div class="grid3"><label class="f"><span>จำนวนวง</span><input type="number" id="g_n" min="1" max="20" value="${ed.rings.length}"></label><label class="f"><span>คะแนนวงนอก</span><input type="number" id="g_s" value="${ed.rings[0]?ed.rings[0].v:1}" step="any"></label><label class="f"><span>เพิ่มทีละ</span><input type="number" id="g_st" value="1" step="any"></label></div>
+     <div class="row"><select id="g_c" class="grow" style="width:auto">${Object.entries(SCHEMES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('')}</select><button class="btn sm soft" id="g_go">สร้างวง</button></div>
+   </div>
+   <div class="row" style="margin:12px 0 6px"><h3 class="grow" style="margin:0">วง (ในสุด → นอกสุด)</h3><span class="tiny muted">สีวง · สีเส้น · ป้าย · คะแนน</span></div>
+   <div id="te_r"></div>
+   <div class="row" style="margin-bottom:12px"><button class="btn sm" id="te_ai">＋ วงด้านใน</button><button class="btn sm" id="te_ao">＋ วงด้านนอก</button></div>
+   <div class="switch"><span>มีวง X (วงในสุดพิเศษ)</span><input type="checkbox" id="te_x" ${ed.x?'checked':''}></div>
+   <div id="te_xo" class="grid3" style="margin-top:8px;${ed.x?'':'display:none'}"><label class="f"><span>ป้าย</span><input type="text" id="te_xl" value="${esc(ed.x?ed.x.label:'X')}" maxlength="4"></label><label class="f"><span>คะแนน</span><input type="number" id="te_xv" step="any" value="${ed.x?ed.x.v:10}"></label><label class="f"><span>ขนาด % ของวงใน</span><input type="number" id="te_xr" min="10" max="95" value="${Math.round((ed.x?ed.x.r??.5:.5)*100)}"></label></div>
+   <div class="note">ลูกที่ออกนอกวงนอกสุดนับเป็น M (0) อัตโนมัติ · คะแนนซ้ำกันได้ (เช่น 2 วงสีเดียวกันให้คะแนนเท่ากัน)</div>
+   <button class="btn pri block" id="te_s" style="margin-top:14px">บันทึกเป้า</button>`,m=>{
+    const prev=()=>{$('#te_prev',m).innerHTML=targetThumb(ed,{labels:true,attr:'style="width:100%;border-radius:12px"'})};
+    const drawRings=()=>{$('#te_r',m).innerHTML=ringsHTML();
+      $$('.ringrow',m).forEach(row=>{const i=+row.dataset.i;$$('[data-k]',row).forEach(inp=>inp.oninput=()=>{const k=inp.dataset.k;ed.rings[i][k]=k==='v'?(parseFloat(inp.value)||0):inp.value;prev()})});
+      $$('[data-rm]',m).forEach(b=>b.onclick=()=>{if(ed.rings.length<=1){toast('ต้องมีอย่างน้อย 1 วง');return}ed.rings.splice(+b.dataset.rm,1);drawRings();prev()})};
+    drawRings();prev();
+    $('#te_n',m).oninput=e=>ed.name=e.target.value;$('#te_d',m).oninput=e=>ed.desc=e.target.value;
+    $('#te_l',m).onchange=e=>{ed.layout=e.target.value;prev()};
+    $('#te_ai',m).onclick=()=>{const l=ed.rings[ed.rings.length-1];ed.rings.push({v:(l?l.v:0)+1,label:String((l?l.v:0)+1),fill:l?l.fill:'#F8D52A',line:l?l.line:'#1a1a1a'});drawRings();prev()};
+    $('#te_ao',m).onclick=()=>{const f=ed.rings[0];const v=f?f.v-1:1;ed.rings.unshift({v,label:String(v),fill:'#FFFFFF',line:'#222222'});drawRings();prev()};
+    $('#g_go',m).onclick=()=>{const n=Math.max(1,Math.min(20,parseInt($('#g_n',m).value)||5)),s0=parseFloat($('#g_s',m).value)||0,st=parseFloat($('#g_st',m).value);const step=isNaN(st)?1:st;const sc=SCHEMES[$('#g_c',m).value];
+      ed.rings=Array.from({length:n},(_,i)=>{const v=Math.round((s0+i*step)*100)/100;const c=sc.f(i,n);return {v,label:String(v),fill:c[0],line:c[1]}});
+      if(ed.x){const top=ed.rings[n-1].v;ed.x.v=top;$('#te_xv',m).value=top}drawRings();prev()};
+    const xsync=()=>{const on=$('#te_x',m).checked;$('#te_xo',m).style.display=on?'':'none';ed.x=on?{label:$('#te_xl',m).value||'X',v:parseFloat($('#te_xv',m).value)||0,r:Math.max(.1,Math.min(.95,(parseFloat($('#te_xr',m).value)||50)/100))}:null;prev()};
+    ['#te_x','#te_xl','#te_xv','#te_xr'].forEach(q=>$(q,m).oninput=xsync);$('#te_x',m).onchange=xsync;
+    $('#te_s',m).onclick=()=>{ed.name=(ed.name||'').trim()||'เป้าของฉัน';delete ed.builtin;S.targets[ed.id]=clone(ed);touchMeta();closeModal();toast('บันทึกเป้าแล้ว — เลือกใช้ได้ตอนเริ่มรอบใหม่');renderTargets()};
+  });
+}
+
+/* ================= SETTINGS ================= */
+function applyTheme(){const t=S.prefs.theme;if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
+function renderSettings(){
+  const el=$('#v-settings');const P=S.prefs;
+  const sw=(k,l,d)=>`<label class="switch"><span><span style="font-weight:500">${l}</span>${d?`<br><span class="tiny muted">${d}</span>`:''}</span><input type="checkbox" data-p="${k}" ${P[k]?'checked':''}></label>`;
+  const nS=Object.keys(S.sessions).length,nA=Object.values(S.sessions).reduce((a,s)=>a+flat(s).length,0);
+  el.innerHTML=`
+  <div class="card"><h2>การแสดงผล</h2>
+    <div class="switch"><span style="font-weight:500">ธีม</span><div class="seg" id="theme">${[['auto','ตามระบบ'],['light','สว่าง'],['dark','มืด']].map(([k,l])=>`<button data-t="${k}" class="${P.theme===k?'on':''}">${l}</button>`).join('')}</div></div>
+    ${sw('loupe','แว่นขยายตอนแตะเป้า','ช่วยวางตำแหน่งลูกได้แม่นบนมือถือ')}
+    ${sw('showPrev','แสดงลูกของชุดก่อนหน้าบนเป้า','จุดจาง ๆ ช่วยเห็นกลุ่มลูกระหว่างยิง')}
+    ${sw('sortEnd','เรียงคะแนนในชุดจากมากไปน้อย','ตามธรรมเนียมการจดคะแนนธนู')}
+  </div>
+  <div class="card"><h2>คันธนู / อุปกรณ์</h2><div id="bows">${P.bows.map((b,i)=>`<span class="tag" style="font-size:13px;padding:4px 6px 4px 10px">${esc(b)} <button class="btn ghost sm" data-rb="${i}" style="min-height:0;padding:0 4px">✕</button></span>`).join('')}</div>
+    <div class="row" style="margin-top:6px"><input type="text" id="nb" class="grow" placeholder="เพิ่มคันธนู เช่น Hoyt Formula 38#" style="width:auto"><button class="btn sm soft" id="ab">เพิ่ม</button></div></div>
+  <div class="card"><h2>รูปแบบรอบที่บันทึกไว้</h2>${(P.rounds||[]).length?(P.rounds.map((r,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><div class="grow"><b>${esc(r.name)}</b><div class="tiny muted">${esc(getTarget(r.target).name)} · ${r.perEnd} ลูก × ${r.ends||'∞'} ชุด · ${esc(r.dist)} ${r.unit==='yd'?'หลา':'ม.'}</div></div><button class="btn sm danger" data-rr="${i}">ลบ</button></div>`).join('')):'<div class="small muted">ยังไม่มี — บันทึกได้จากฟอร์ม "เริ่มรอบยิงใหม่"</div>'}</div>
+  <div class="card"><h2>ข้อมูล</h2><div class="small ink2" style="margin-bottom:10px">${nS} รอบยิง · ${nA.toLocaleString()} ลูก · ${Object.keys(S.targets).length} เป้าที่สร้างเอง<br><span class="muted">${COLL?'ข้อมูลซิงก์กับบัญชีของคุณ (เห็นเฉพาะคุณ) และเก็บสำรองในเครื่องนี้':'ข้อมูลเก็บในเครื่องนี้เท่านั้น — ส่งออก JSON ไว้สำรองเป็นระยะ และใช้ "นำเข้า JSON" เพื่อย้ายไปเครื่องอื่น'}</span></div>
+    <div class="row"><button class="btn sm" id="exJ">ส่งออก JSON (สำรอง)</button><button class="btn sm" id="exC">ส่งออก CSV (Excel)</button><label class="btn sm" style="cursor:pointer">นำเข้า JSON<input type="file" id="imJ" accept=".json,application/json" style="display:none"></label></div>
+    <div class="row" style="margin-top:10px"><button class="btn sm danger" id="wipe">ลบข้อมูลทั้งหมด</button></div></div>`;
+  $$('[data-t]',el).forEach(b=>b.onclick=()=>{P.theme=b.dataset.t;applyTheme();touchMeta();renderSettings()});
+  $$('[data-p]',el).forEach(c=>c.onchange=()=>{P[c.dataset.p]=c.checked;touchMeta()});
+  $$('[data-rb]',el).forEach(b=>b.onclick=()=>{P.bows.splice(+b.dataset.rb,1);touchMeta();renderSettings()});
+  $('#ab',el).onclick=()=>{const v=$('#nb',el).value.trim();if(v&&!P.bows.includes(v)){P.bows.push(v);touchMeta()}renderSettings()};
+  $$('[data-rr]',el).forEach(b=>b.onclick=()=>{P.rounds.splice(+b.dataset.rr,1);touchMeta();renderSettings()});
+  $('#exJ',el).onclick=()=>exportFile('archery-backup-'+todayISO()+'.json',JSON.stringify({app:'archery-score',version:1,exported:new Date().toISOString(),sessions:S.sessions,targets:S.targets,prefs:S.prefs},null,1),'application/json');
+  $('#exC',el).onclick=()=>exportFile('archery-arrows-'+todayISO()+'.csv','﻿'+toCSV(),'text/csv');
+  $('#imJ',el).onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.sessions)throw 0;let c=0;
+      Object.values(d.sessions).forEach(s=>{if(!s||!s.id||!s.target||!Array.isArray(s.ends))return;const l=S.sessions[s.id];if(!l||(s.updatedAt||0)>(l.updatedAt||0)){S.sessions[s.id]=s;delete S.deleted[s.id];s.done=true;s.updatedAt=Date.now();queueRemote('s_'+s.id);c++}});
+      Object.values(d.targets||{}).forEach(t=>{if(t&&t.id&&Array.isArray(t.rings))S.targets[t.id]=t});
+      (d.prefs&&d.prefs.rounds||[]).forEach(r=>{if(!(S.prefs.rounds||[]).find(x=>x.id===r.id))(S.prefs.rounds=S.prefs.rounds||[]).push(r)});
+      touchMeta();toast(`นำเข้า ${c} รอบยิงแล้ว`);renderSettings()}catch(err){toast('ไฟล์ไม่ถูกต้อง')}};rd.readAsText(file)};
+  $('#wipe',el).onclick=()=>confirmBox('ลบข้อมูลทั้งหมด?','รอบยิง สถิติ และเป้าที่สร้างเองจะถูกลบทั้งหมด แนะนำให้ส่งออก JSON ไว้ก่อน','ลบทั้งหมด',()=>{Object.keys(S.sessions).forEach(id=>{S.deleted[id]=Date.now();delete S.sessions[id];queueRemote('s_'+id)});S.targets={};S.currentId=null;touchMeta();toast('ลบแล้ว');renderSettings()});
+}
+function toCSV(){const q=v=>{const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const rows=[['date','session','bow','distance','unit','target','end','arrow','score','label','is_x','x','y','note']];
+  Object.values(S.sessions).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(s=>s.ends.forEach((e,ei)=>e.forEach((a,ai)=>rows.push([s.date,s.title,s.bow,s.dist,s.unit,s.target.name,ei+1,ai+1,a.v,arrowLabel(s.target,a),a.x?1:0,a.nx??'',a.ny??'',s.note]))));
+  return rows.map(r=>r.map(q).join(',')).join('\n')}
+async function exportFile(name,data,mime){
+  try{const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(dl){await dl.save({filename:name,data,mimeType:mime});toast('บันทึกไฟล์แล้ว');return}}catch(e){if(e&&/declin|cancel|reject/i.test(String(e.code||e.message)))return}
+  const native=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  if(!native){try{const url=URL.createObjectURL(new Blob([data],{type:mime+';charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast('ดาวน์โหลดไฟล์แล้ว');return}catch(e){}}
+  showText(name,data);
+}
+function showText(title,txt){openModal(`<h2>${esc(title)} ${closeBtn}</h2><div class="small muted" style="margin-bottom:8px">คัดลอกข้อความด้านล่างไปวางเก็บไว้ (เช่น Notes หรือไฟล์ข้อความ)</div><textarea class="out" readonly id="tx">${esc(txt)}</textarea><button class="btn pri block" id="cp" style="margin-top:10px">คัดลอก</button>`,m=>{$('#cp',m).onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว')}catch(e){const t=$('#tx',m);t.focus();t.select();toast('เลือกข้อความแล้ว — กดคัดลอกจากเมนู')}}})}
+
+/* ================= CLUB SCOREBOARD (shared db: board/<uid>) ================= */
+let BOARDC=null,BUSER=null,MYID=null,MYB=null,BOARD={},boardLoaded=false,boardState='off',boardReadOnly=false,IS_OWNER=false;
+const NAMES={};let bWriting=false,bAgain=false,bTimer=null;
+const CF={cat:'',period:'30',metric:'best'};
+function entryOf(s){const st=sStats(s),t=s.target;return {sid:s.id,title:s.title,date:s.date,bow:s.bow||'',dist:s.dist||'',unit:s.unit||'m',targetId:s.targetId,targetName:t.name,perEnd:s.perEnd,n:st.n,tot:st.tot,max:st.n*st.mx,xs:st.xs,top:st.top,xLabel:t.x?t.x.label:'',at:Date.now()}}
+function initBoard(db,user,id){
+  BUSER=user;MYID=id;BOARDC=db.collection('board');boardState='loading';
+  try{IS_OWNER=!!(user.isOwner&&user.isOwner())}catch(e){}
+  const to=setTimeout(()=>{if(!boardLoaded){boardState='slow';if(VIEW==='club')renderClub()}},10000);
+  BOARDC.onSnapshot(snap=>{
+    const next={};snap.docs.forEach(d=>{const v=d.data();if(v&&typeof v==='object')next[d.id]=v});
+    const remoteMine=next[MYID];
+    if(!MYB||(remoteMine&&(remoteMine.updatedAt||0)>(MYB.updatedAt||0)))MYB=remoteMine?clone(remoteMine):(MYB||{nick:'',entries:{},updatedAt:0});
+    if(!MYB.entries)MYB.entries={};
+    next[MYID]=MYB.updatedAt||Object.keys(MYB.entries).length?MYB:next[MYID];if(!next[MYID])delete next[MYID];
+    BOARD=next;
+    if(!snap.metadata.fromCache){clearTimeout(to);const wasLoaded=boardLoaded;boardLoaded=true;boardState='ok';if(!wasLoaded&&bAgain){bAgain=false;flushBoard()}}
+    resolveNames();if(VIEW==='club')renderClub();
+  },err=>{clearTimeout(to);boardState='err';if(VIEW==='club')renderClub()});
+}
+async function resolveNames(){
+  if(!BUSER||!BUSER.profiles)return;const ids=Object.keys(BOARD).filter(id=>!(id in NAMES));if(!ids.length)return;
+  try{const ps=await BUSER.profiles(ids);ids.forEach(id=>{NAMES[id]=(ps&&ps[id]&&ps[id].name)||''});if(VIEW==='club')renderClub()}catch(e){}
+}
+const nameOf=id=>{const d=BOARD[id];return (d&&String(d.nick||'').trim())||NAMES[id]||'สมาชิก'};
+function queueBoard(){clearTimeout(bTimer);bTimer=setTimeout(flushBoard,600)}
+async function flushBoard(){
+  if(!BOARDC||!MYID||!MYB)return;if(!boardLoaded||bWriting){bAgain=true;return}
+  bWriting=true;
+  try{await BOARDC.doc(MYID).set({nick:MYB.nick||'',entries:MYB.entries,updatedAt:MYB.updatedAt});boardReadOnly=false}
+  catch(e){if(e&&e.code==='invalid_argument'){boardReadOnly=true;toast('บัญชีนี้ดูกระดานได้อย่างเดียว — ให้เจ้าของเชิญเป็น Editor')}else if(e&&e.code==='quota_exceeded')toast('พื้นที่กระดานเต็ม');else toast('ส่งขึ้นกระดานไม่สำเร็จ ลองใหม่อีกครั้ง');if(VIEW==='club')renderClub()}
+  finally{bWriting=false;if(bAgain&&boardLoaded){bAgain=false;flushBoard()}}
+}
+function boardPut(s){if(!BOARDC||!MYB)return;MYB.entries[s.id]=entryOf(s);MYB.updatedAt=Date.now();BOARD[MYID]=MYB;queueBoard();if(VIEW==='club')renderClub()}
+function boardRemove(sid){if(!MYB)return;delete MYB.entries[sid];MYB.updatedAt=Date.now();BOARD[MYID]=MYB;queueBoard();if(VIEW==='club')renderClub()}
+const catOf=e=>`${e.targetName} · ${e.dist?e.dist+(e.unit==='yd'?' หลา':' ม.'):'ไม่ระบุระยะ'} · ${e.n} ลูก`;
+function periodOk(e){if(CF.period==='all')return true;const d=new Date();if(CF.period==='year')return (e.date||'').slice(0,4)===String(d.getFullYear());const lim=new Date(Date.now()-(+CF.period)*864e5).toISOString().slice(0,10);return (e.date||'')>=lim}
+function allEntries(){const out=[];for(const uid in BOARD){const es=(BOARD[uid]&&BOARD[uid].entries)||{};for(const k in es){const e=es[k];if(e&&typeof e.tot==='number'&&e.n>0)out.push({...e,uid})}}return out}
+const initials=n=>(n||'?').trim().slice(0,1).toUpperCase();
+function renderClub(){
+  const el=$('#v-club');
+  if(!BOARDC){el.innerHTML=`<div class="card"><h2>🏆 กระดานคะแนนชมรม</h2><div class="small ink2">กระดานคะแนนรวมของชมรมใช้ได้เฉพาะเวอร์ชันบน claude.ai (ต้องล็อกอินบัญชี Claude) — เวอร์ชันนี้เก็บคะแนนในเครื่องของคุณ ${boardState==='off'?'— ตอนนี้กำลังใช้งานแบบเก็บข้อมูลในเครื่องอย่างเดียว':''}</div></div>`;return}
+  if(!boardLoaded){el.innerHTML=`<div class="card"><h2>🏆 กระดานคะแนนชมรม</h2><div class="empty">${boardState==='err'?'โหลดกระดานไม่ได้ในตอนนี้':boardState==='slow'?'ยังเชื่อมต่อกระดานไม่ได้ — ตรวจสอบอินเทอร์เน็ต':'กำลังโหลดกระดาน…'}</div></div>`;return}
+  const ents=allEntries().filter(periodOk);
+  const cats={};ents.forEach(e=>{const c=catOf(e);cats[c]=(cats[c]||0)+1});
+  const catList=Object.keys(cats).sort((a,b)=>cats[b]-cats[a]);
+  if(CF.cat&&!cats[CF.cat])CF.cat='';
+  const f=CF.cat?ents.filter(e=>catOf(e)===CF.cat):ents;
+  // aggregate per member
+  const by={};f.forEach(e=>{const m=by[e.uid]||(by[e.uid]={uid:e.uid,n:0,tot:0,max:0,rounds:0,best:null,xs:0});m.n+=e.n;m.tot+=e.tot;m.max+=e.max;m.rounds++;m.xs+=e.xs;
+    const score=CF.cat?e.tot:e.tot/Math.max(1,e.max);const bs=m.best?(CF.cat?m.best.tot:m.best.tot/Math.max(1,m.best.max)):-1;if(score>bs)m.best=e});
+  const val=m=>CF.metric==='best'?(CF.cat?m.best.tot:m.best.tot/Math.max(1,m.best.max)*100):CF.metric==='avg'?m.tot/m.n:m.n;
+  const rows=Object.values(by).sort((a,b)=>val(b)-val(a)||b.n-a.n);
+  const fmtV=m=>CF.metric==='best'?(CF.cat?`<b>${m.best.tot}</b><span class="tiny muted">/${m.best.max}</span>`:`<b>${r1(val(m))}%</b><span class="tiny muted">${m.best.tot}/${m.best.max}</span>`):CF.metric==='avg'?`<b>${val(m).toFixed(2)}</b><span class="tiny muted">ต่อลูก</span>`:`<b>${m.n.toLocaleString()}</b><span class="tiny muted">ลูก</span>`;
+  const medal=i=>['🥇','🥈','🥉'][i]||String(i+1);
+  const myCount=MYB?Object.keys(MYB.entries).length:0;
+  const myDone=Object.values(S.sessions).filter(s=>s.done&&flat(s).length);
+  const unsent=myDone.filter(s=>!(MYB&&MYB.entries[s.id])).length;
+  const feed=allEntries().sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,12);
+  const opt=(v,l,sel)=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(l)}</option>`;
+  el.innerHTML=`
+  <div class="card"><div class="row"><h2 class="grow" style="margin:0">🏆 กระดานคะแนนชมรม</h2><span class="tiny muted">${Object.keys(BOARD).length} สมาชิก</span></div>
+    <div class="small muted" style="margin-top:2px">ทุกคนที่เปิดลิงก์นี้เห็นกระดานเดียวกัน · แต่ละคนส่งได้เฉพาะคะแนนของตัวเอง</div></div>
+  <div class="card"><h3>โปรไฟล์ของฉันบนกระดาน</h3>
+    <div class="row"><input type="text" id="c_nick" class="grow" style="width:auto" maxlength="30" placeholder="${esc(NAMES[MYID]||'ชื่อที่แสดง')}" value="${esc(MYB&&MYB.nick||'')}"><button class="btn sm soft" id="c_save">บันทึกชื่อ</button></div>
+    <label class="switch"><span><span style="font-weight:500">ส่งคะแนนขึ้นกระดานอัตโนมัติเมื่อจบรอบ</span><br><span class="tiny muted">ปิดไว้ถ้าอยากเลือกส่งเองจากหน้ารายละเอียดรอบ</span></span><input type="checkbox" id="c_auto" ${S.prefs.boardAuto!==false?'checked':''}></label>
+    <div class="row small" style="margin-top:8px"><span class="grow muted">ส่งแล้ว ${myCount} รอบ${unsent?` · ยังไม่ส่ง ${unsent} รอบ`:''}</span>${unsent?`<button class="btn sm" id="c_all">ส่งรอบที่เหลือทั้งหมด</button>`:''}</div>
+    ${boardReadOnly?'<div class="note">บัญชีนี้ยังส่งคะแนนไม่ได้ (สิทธิ์ดูอย่างเดียว) — ขอให้เจ้าของกระดานเชิญอีเมลของคุณเป็น Editor</div>':''}
+  </div>
+  <div class="card"><div class="filters">
+    <select id="c_cat">${opt('','ทุกรูปแบบ (เทียบ % ของคะแนนเต็ม)',CF.cat)}${catList.map(c=>opt(c,c+` (${cats[c]})`,CF.cat)).join('')}</select>
+    <select id="c_per">${opt('7','7 วัน',CF.period)}${opt('30','30 วัน',CF.period)}${opt('year','ปีนี้',CF.period)}${opt('all','ทั้งหมด',CF.period)}</select>
+    <select id="c_met">${opt('best','รอบที่ดีที่สุด',CF.metric)}${opt('avg','เฉลี่ยต่อลูก',CF.metric)}${opt('vol','ซ้อมมากที่สุด',CF.metric)}</select>
+  </div>
+  <div style="margin-top:6px">${rows.length?rows.map((m,i)=>`<div class="rk ${m.uid===MYID?'me':''}" data-u="${esc(m.uid)}"><div class="no">${medal(i)}</div><div class="av">${esc(initials(nameOf(m.uid)))}</div><div class="grow" style="min-width:0"><div class="nm">${esc(nameOf(m.uid))}${m.uid===MYID?' <span class="tag acc">ฉัน</span>':''}</div><div class="tiny muted">${m.rounds} รอบ · ${m.n} ลูก · เฉลี่ย ${(m.tot/m.n).toFixed(2)}${m.xs?` · X ${m.xs}`:''}</div></div><div class="val">${fmtV(m)}</div></div>`).join(''):'<div class="empty">ยังไม่มีคะแนนในช่วงนี้ — จบรอบยิงแล้วคะแนนจะขึ้นที่นี่</div>'}</div>
+  ${!CF.cat&&rows.length?'<div class="tiny muted" style="margin-top:6px">รวมหลายรูปแบบ จึงเทียบด้วย % ของคะแนนเต็ม — เลือกรูปแบบเดียวเพื่อเทียบคะแนนจริง</div>':''}</div>
+  <div class="card"><h2>ความเคลื่อนไหวล่าสุด</h2>${feed.length?feed.map(e=>`<div class="feed"><div class="av" style="width:30px;height:30px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink2);flex:none">${esc(initials(nameOf(e.uid)))}</div><div class="grow" style="min-width:0"><b>${esc(nameOf(e.uid))}</b> ยิง ${esc(e.title)}<div class="tiny muted">${fmtDate(e.date)} · ${esc(catOf(e))}${e.bow?' · '+esc(e.bow):''}</div></div><div style="text-align:right;font-variant-numeric:tabular-nums"><b>${e.tot}</b><div class="tiny muted">/${e.max}</div></div></div>`).join(''):'<div class="empty">ยังไม่มี</div>'}</div>`;
+  $('#c_cat',el).onchange=e=>{CF.cat=e.target.value;renderClub()};$('#c_per',el).onchange=e=>{CF.period=e.target.value;renderClub()};$('#c_met',el).onchange=e=>{CF.metric=e.target.value;renderClub()};
+  $('#c_save',el).onclick=()=>{if(!MYB)return;MYB.nick=$('#c_nick',el).value.trim().slice(0,30);MYB.updatedAt=Date.now();BOARD[MYID]=MYB;queueBoard();toast('บันทึกชื่อแล้ว');renderClub()};
+  $('#c_auto',el).onchange=e=>{S.prefs.boardAuto=e.target.checked;touchMeta()};
+  const ca=$('#c_all',el);if(ca)ca.onclick=()=>{myDone.forEach(s=>{if(!MYB.entries[s.id])MYB.entries[s.id]=entryOf(s)});MYB.updatedAt=Date.now();BOARD[MYID]=MYB;queueBoard();toast('ส่งขึ้นกระดานแล้ว');renderClub()};
+  $$('.rk',el).forEach(r=>r.onclick=()=>openMember(r.dataset.u));
+}
+function openMember(uid){
+  const es=allEntries().filter(e=>e.uid===uid).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.at||0)-(a.at||0));
+  const n=es.reduce((a,e)=>a+e.n,0),tot=es.reduce((a,e)=>a+e.tot,0);const mine=uid===MYID;
+  openModal(`<h2>${esc(nameOf(uid))} ${closeBtn}</h2>
+   <div class="tiles" style="margin-bottom:12px"><div class="tile"><div class="l">รอบที่ส่ง</div><div class="v">${es.length}</div></div><div class="tile"><div class="l">ลูกทั้งหมด</div><div class="v">${n.toLocaleString()}</div></div><div class="tile"><div class="l">เฉลี่ย/ลูก</div><div class="v">${n?(tot/n).toFixed(2):'–'}</div></div></div>
+   ${es.length>1?'<h3>พัฒนาการ (เฉลี่ยต่อลูก)</h3><div class="chart" id="m_ch"></div>':''}
+   <h3 style="margin-top:10px">รอบยิง</h3>
+   ${es.map(e=>`<div class="feed"><div class="grow" style="min-width:0"><b>${esc(e.title)}</b><div class="tiny muted">${fmtDate(e.date)} · ${esc(catOf(e))}${e.bow?' · '+esc(e.bow):''}${e.xs?` · ${esc(e.xLabel||'X')} ${e.xs}`:''}</div></div><div style="text-align:right;font-variant-numeric:tabular-nums"><b>${e.tot}</b><div class="tiny muted">/${e.max}</div></div>${mine||IS_OWNER?`<button class="btn ghost sm" data-rm="${esc(e.sid)}" aria-label="เอาออก">✕</button>`:''}</div>`).join('')||'<div class="empty">ไม่มี</div>'}
+   ${IS_OWNER&&!mine?'<div class="tiny muted" style="margin-top:8px">คุณเป็นเจ้าของกระดาน จึงลบคะแนนของสมาชิกได้</div>':''}`,m=>{
+    const ch=$('#m_ch',m);if(ch){const pts=[...es].reverse().map(e=>({label:fmtDate(e.date),value:e.tot/e.n,tip:`<b>${esc(e.title)}</b><br>${fmtDate(e.date)} · ${esc(catOf(e))}<br>${e.tot}/${e.max} · เฉลี่ย ${(e.tot/e.n).toFixed(2)}`}));requestAnimationFrame(()=>lineChart(ch,pts,{fmt:v=>v.toFixed(1)}))}
+    $$('[data-rm]',m).forEach(b=>b.onclick=()=>confirmBox('เอาคะแนนนี้ออกจากกระดาน?','รอบยิงในประวัติของเจ้าของยังอยู่ แค่ไม่แสดงบนกระดาน','เอาออก',async()=>{
+      const sid=b.dataset.rm;
+      if(mine){boardRemove(sid);openMember(uid);return}
+      try{const d=clone(BOARD[uid]);delete d.entries[sid];d.updatedAt=Date.now();await BOARDC.doc(uid).set(d);toast('เอาออกแล้ว')}catch(e){toast('ลบไม่สำเร็จ')}
+    }));
+  });
+}
+
+/* ================= Boot ================= */
+applyTheme();render();initRemote();
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)&&!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
